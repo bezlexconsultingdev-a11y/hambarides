@@ -1,0 +1,46 @@
+.title {
+  margin: 0 0 28px;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #001489;
+  letter-spacing: -0.02em;
+}
+
+.loading,
+.error {
+  padding: 28px;
+  color: #555;
+}
+
+.error {
+  color: #E03C31;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 20px;
+}
+
+.card {
+  background: #FFFFFF;
+  border: 1px solid #e0e0e0;
+  border-radius: 14px;
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.cardLabel {
+  font-size: 0.8rem;
+  color: #555;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.cardValue {
+  font-size: 1.55rem;
+  font-weight: 700;
+  color: #007749;
+}

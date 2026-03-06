@@ -1,0 +1,233 @@
+.title {
+  margin: 0 0 28px;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #001489;
+  letter-spacing: -0.02em;
+}
+
+.loading {
+  padding: 28px;
+  color: #555;
+}
+
+.toolbar {
+  margin-bottom: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.dateLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: #555;
+}
+
+.dateInput {
+  padding: 8px 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  color: #1a1a1a;
+}
+
+.exportBtn {
+  padding: 10px 18px;
+  background: #001489;
+  border: none;
+  border-radius: 10px;
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.exportBtn:hover {
+  background: #000d5c;
+}
+
+.select {
+  padding: 10px 14px;
+  background: #FFFFFF;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  color: #1a1a1a;
+  font-size: 0.9rem;
+}
+
+.tableWrap {
+  overflow-x: auto;
+  background: #FFFFFF;
+  border: 1px solid #e0e0e0;
+  border-radius: 14px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.table th,
+.table td {
+  padding: 14px 18px;
+  text-align: left;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.table th {
+  background: #F8F7F5;
+  color: #555;
+  font-weight: 600;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.table tbody tr:hover {
+  background: #f8f9fa;
+}
+
+.cellClip {
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.subtitle {
+  margin: 32px 0 16px;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.subtitle:first-of-type {
+  margin-top: 0;
+}
+
+.muted {
+  color: #555;
+  margin: 8px 0;
+}
+
+.input {
+  padding: 6px 10px;
+  margin-right: 8px;
+  background: #FFFFFF;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  color: #1a1a1a;
+  font-size: 0.85rem;
+  min-width: 160px;
+}
+
+.btnPrimary {
+  padding: 6px 12px;
+  margin-right: 8px;
+  background: #007749;
+  border: none;
+  border-radius: 6px;
+  color: #fff;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.btnPrimary:hover {
+  background: #006040;
+}
+
+.btnDanger {
+  padding: 6px 12px;
+  margin-right: 8px;
+  background: #E03C31;
+  border: none;
+  border-radius: 6px;
+  color: #fff;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.btnDanger:hover {
+  background: #c53329;
+}
+
+.expandBtn {
+  background: transparent;
+  border: none;
+  color: #555;
+  cursor: pointer;
+  padding: 4px 8px;
+  font-size: 0.85rem;
+}
+
+.expandBtn:hover {
+  color: #001489;
+}
+
+.detailsCell {
+  background: #F8F7F5;
+  padding: 0;
+  vertical-align: top;
+}
+
+.detailsBox {
+  padding: 16px 20px;
+  font-size: 0.9rem;
+  color: #1a1a1a;
+}
+
+.detailsBox p {
+  margin: 0 0 8px;
+}
+
+.detailsBox p:last-of-type {
+  margin-top: 12px;
+}
+
+.docList {
+  margin: 8px 0 0;
+  padding-left: 20px;
+}
+
+.docList li {
+  margin-bottom: 6px;
+}
+
+.docLink {
+  color: #001489;
+  text-decoration: none;
+}
+
+.docLink:hover {
+  text-decoration: underline;
+}
+
+.payoutSummary {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: #FFFFFF;
+  border: 1px solid #e0e0e0;
+  border-radius: 14px;
+  padding: 24px 28px;
+  margin: 24px 0 32px;
+  max-width: 340px;
+}
+
+.payoutLabel {
+  font-size: 0.85rem;
+  color: #555;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.payoutValue {
+  font-size: 1.85rem;
+  font-weight: 800;
+  color: #007749;
+}

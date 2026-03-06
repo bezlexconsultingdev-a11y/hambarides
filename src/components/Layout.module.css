@@ -1,0 +1,92 @@
+.layout {
+  display: flex;
+  min-height: 100vh;
+  background: #F8F7F5;
+  color: #1a1a1a;
+}
+
+.sidebar {
+  width: 260px;
+  background: #FFFFFF;
+  border-right: 1px solid #e0e0e0;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebarHeader {
+  padding: 24px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.logo {
+  font-size: 1.35rem;
+  font-weight: 800;
+  margin: 0;
+  color: #001489;
+  letter-spacing: -0.02em;
+}
+
+.nav {
+  flex: 1;
+  padding: 20px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.navLink,
+.navLinkActive {
+  padding: 12px 16px;
+  border-radius: 10px;
+  text-decoration: none;
+  color: #555;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: background 0.15s, color 0.15s;
+}
+
+.navLink:hover {
+  background: #f0f0f0;
+  color: #001489;
+}
+
+.navLinkActive {
+  background: #f0f9f4;
+  color: #007749;
+  font-weight: 600;
+}
+
+.sidebarFooter {
+  padding: 20px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.userEmail {
+  display: block;
+  font-size: 0.8rem;
+  color: #666;
+  margin-bottom: 10px;
+  word-break: break-all;
+}
+
+.logoutBtn {
+  width: 100%;
+  padding: 10px 14px;
+  background: #FFFFFF;
+  border: 2px solid #E03C31;
+  border-radius: 10px;
+  color: #E03C31;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.logoutBtn:hover {
+  background: #ffebee;
+}
+
+.main {
+  flex: 1;
+  padding: 28px 32px;
+  overflow: auto;
+}
