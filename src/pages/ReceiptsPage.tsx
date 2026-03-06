@@ -1,25 +1,15 @@
 import { useState, useEffect } from 'react';
-import { api } from '../api/client';
+import { getReceipts } from '../api/admin';
+import type { ReceiptRow } from '../api/admin';
 import styles from './TablePage.module.css';
-
-interface ReceiptRow {
-  id: number;
-  ride_id: number;
-  rider_id: number;
-  driver_id: number;
-  fare_amount: number;
-  payment_method: string;
-  created_at: string;
-}
 
 export default function ReceiptsPage() {
   const [receipts, setReceipts] = useState<ReceiptRow[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api
-      .get<{ receipts: ReceiptRow[] }>('/admin/receipts', { params: { limit: 100 } })
-      .then((res) => setReceipts(res.data.receipts ?? []))
+    getReceipts({ limit: 100 })
+      .then((res) => setReceipts(res.receipts ?? []))
       .catch(() => setReceipts([]))
       .finally(() => setLoading(false));
   }, []);
@@ -30,10 +20,10 @@ export default function ReceiptsPage() {
     <div>
       <h1 className={styles.title}>Receipts</h1>
       <p className={styles.muted}>
-        Digital receipts for completed rides. Backend: GET /admin/receipts.
+        Digital receipts for completed rides (from Supabase).
       </p>
       {receipts.length === 0 ? (
-        <p className={styles.muted}>No receipts yet, or backend endpoint not configured.</p>
+        <p className={styles.muted}>No receipts yet.</p>
       ) : (
         <div className={styles.tableWrap}>
           <table className={styles.table}>

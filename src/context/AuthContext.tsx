@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { supabase } from '../lib/supabase';
 import type { AdminUser } from '../api/auth';
 import { getMe } from '../api/auth';
 
@@ -7,7 +8,6 @@ interface AuthContextValue {
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
-  setToken: (token: string, user: AdminUser) => void;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -16,51 +16,47 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AdminUser | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const setToken = useCallback((token: string, u: AdminUser) => {
-    localStorage.setItem('admin_token', token);
-    localStorage.setItem('admin_user', JSON.stringify(u));
-    setUser(u);
-  }, []);
-
   const logout = useCallback(() => {
-    localStorage.removeItem('admin_token');
-    localStorage.removeItem('admin_user');
+    supabase.auth.signOut();
     setUser(null);
     window.location.href = '/login';
   }, []);
 
   const login = useCallback(async (email: string, password: string) => {
     const { login: apiLogin } = await import('../api/auth');
-    const { token, user: u } = await apiLogin(email, password);
-    setToken(token, u);
-  }, [setToken]);
+    const { user: u } = await apiLogin(email, password);
+    setUser(u);
+  }, []);
 
   useEffect(() => {
-    const token = localStorage.getItem('admin_token');
-    const saved = localStorage.getItem('admin_user');
-    if (!token) {
-      setLoading(false);
-      return;
-    }
-    if (saved) {
-      try {
-        setUser(JSON.parse(saved));
-      } catch {
-        // ignore
+    let cancelled = false;
+
+    const init = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session || cancelled) {
+        setLoading(false);
+        return;
       }
-    }
-    getMe()
-      .then((u) => setUser(u))
-      .catch(() => {
-        localStorage.removeItem('admin_token');
-        localStorage.removeItem('admin_user');
-        setUser(null);
-      })
-      .finally(() => setLoading(false));
+      getMe()
+        .then((u) => { if (!cancelled) setUser(u); })
+        .catch(() => { if (!cancelled) setUser(null); })
+        .finally(() => { if (!cancelled) setLoading(false); });
+    };
+
+    init();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!session) setUser(null);
+    });
+
+    return () => {
+      cancelled = true;
+      subscription.unsubscribe();
+    };
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout, setToken }}>
+    <AuthContext.Provider value={{ user, loading, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

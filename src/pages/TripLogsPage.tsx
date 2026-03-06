@@ -1,27 +1,15 @@
 import { useState, useEffect } from 'react';
-import { api } from '../api/client';
+import { getTripLogs } from '../api/admin';
+import type { TripLogRow } from '../api/admin';
 import styles from './TablePage.module.css';
-
-interface TripLogRow {
-  id: number;
-  ride_id: number;
-  driver_id: number;
-  rider_id: number;
-  pickup_address: string;
-  dropoff_address: string;
-  started_at: string | null;
-  completed_at: string | null;
-  created_at: string;
-}
 
 export default function TripLogsPage() {
   const [logs, setLogs] = useState<TripLogRow[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api
-      .get<{ trip_logs: TripLogRow[] }>('/admin/trip-logs', { params: { limit: 100 } })
-      .then((res) => setLogs(res.data.trip_logs ?? []))
+    getTripLogs({ limit: 100 })
+      .then((res) => setLogs(res.trip_logs ?? []))
       .catch(() => setLogs([]))
       .finally(() => setLoading(false));
   }, []);
@@ -32,10 +20,10 @@ export default function TripLogsPage() {
     <div>
       <h1 className={styles.title}>Trip logs</h1>
       <p className={styles.muted}>
-        Stored trip logs for support and disputes. Backend: GET /admin/trip-logs.
+        Stored trip logs for support and disputes (from Supabase).
       </p>
       {logs.length === 0 ? (
-        <p className={styles.muted}>No trip logs yet, or backend endpoint not configured.</p>
+        <p className={styles.muted}>No trip logs yet.</p>
       ) : (
         <div className={styles.tableWrap}>
           <table className={styles.table}>
