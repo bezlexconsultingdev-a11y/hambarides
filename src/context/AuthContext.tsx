@@ -32,6 +32,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     let cancelled = false;
 
     const init = async () => {
+      // Dev only: skip login and use a mock admin (set VITE_DEV_SKIP_LOGIN=true in .env)
+      if (import.meta.env.DEV && import.meta.env.VITE_DEV_SKIP_LOGIN === 'true') {
+        setUser({
+          id: 'dev-admin',
+          email: 'admin@test.co.za',
+          first_name: 'Hamba',
+          last_name: 'Rides',
+          user_type: 'admin',
+        });
+        setLoading(false);
+        return;
+      }
+
       const { data: { session } } = await supabase.auth.getSession();
       if (!session || cancelled) {
         setLoading(false);

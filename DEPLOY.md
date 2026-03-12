@@ -5,7 +5,7 @@
 From your machine (PowerShell in project root):
 
 ```powershell
-cd c:\Users\donal\mzansirides
+cd c:\Users\donal\hambarides
 
 # If this folder is not yet a git repo:
 git init
@@ -21,12 +21,12 @@ git push -u origin main
 To deploy **only** the admin dashboard (recommended), use a separate repo:
 
 ```powershell
-cd c:\Users\donal\mzansirides\admin-dashboard
+cd c:\Users\donal\hambarides\admin-dashboard
 git init
 git add .
 git commit -m "Initial commit"
-# Create repo on GitHub named e.g. mzansirides-admin
-git remote add origin https://github.com/YOUR_USERNAME/mzansirides-admin.git
+# Create repo on GitHub named e.g. hambarides-admin
+git remote add origin https://github.com/YOUR_USERNAME/hambarides-admin.git
 git branch -M main
 git push -u origin main
 ```
@@ -35,8 +35,8 @@ git push -u origin main
 
 1. Sign in at [vercel.com](https://vercel.com) (with GitHub).
 2. **Add New…** → **Project** → **Import Git Repository**.
-3. Select your repo (e.g. `mzansirides-admin`).
-4. **Root Directory**: leave default, or set to `admin-dashboard` if you imported the whole `mzansirides` repo.
+3. Select your repo (e.g. `hambarides-admin`).
+4. **Root Directory**: leave default, or set to `admin-dashboard` if you imported the whole `hambarides` repo.
 5. **Framework Preset**: Vite (auto-detected).
 6. **Environment Variables** (important):
    - `VITE_API_BASE` = your backend API base URL, e.g.:

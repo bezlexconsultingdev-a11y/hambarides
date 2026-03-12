@@ -68,6 +68,12 @@ export default function Layout() {
             Trip logs
           </Link>
           <Link
+            to="/pricing"
+            className={location.pathname === '/pricing' ? styles.navLinkActive : styles.navLink}
+          >
+            Pricing
+          </Link>
+          <Link
             to="/ride-drawer"
             className={location.pathname === '/ride-drawer' ? styles.navLinkActive : styles.navLink}
           >
