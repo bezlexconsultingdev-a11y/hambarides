@@ -1,0 +1,349 @@
+.container {
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.header {
+  margin-bottom: 2rem;
+}
+
+.header h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 0.5rem 0;
+}
+
+.subtitle {
+  color: #666;
+  font-size: 1rem;
+  margin: 0;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.statCard {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.statLabel {
+  font-size: 0.875rem;
+  color: #666;
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.statValue {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.tableContainer {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table thead {
+  background: #f8f9fa;
+}
+
+.table th {
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  color: #1a1a1a;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid #e9ecef;
+}
+
+.table td {
+  padding: 1rem;
+  border-bottom: 1px solid #e9ecef;
+  color: #495057;
+}
+
+.table tbody tr:hover {
+  background: #f8f9fa;
+}
+
+.balanceCell {
+  font-weight: 600;
+  color: #28a745;
+}
+
+.emptyState {
+  text-align: center;
+  padding: 3rem !important;
+  color: #999;
+}
+
+.payButton {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 0.5rem 1.5rem;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.payButton:hover {
+  background: #0056b3;
+}
+
+.loading {
+  text-align: center;
+  padding: 3rem;
+  font-size: 1.125rem;
+  color: #666;
+}
+
+/* Modal Styles */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.modalContent {
+  background: white;
+  border-radius: 12px;
+  max-width: 700px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.modalHeader h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  font-size: 2rem;
+  color: #999;
+  cursor: pointer;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.closeButton:hover {
+  background: #f8f9fa;
+  color: #666;
+}
+
+.modalBody {
+  padding: 1.5rem;
+}
+
+.section {
+  margin-bottom: 1.5rem;
+}
+
+.section h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0 0 1rem 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.breakdown {
+  background: #f8f9fa;
+  padding: 1rem;
+  border-radius: 8px;
+}
+
+.breakdownRow {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+  color: #495057;
+}
+
+.breakdownRow.total {
+  border-top: 2px solid #dee2e6;
+  margin-top: 0.5rem;
+  padding-top: 1rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  font-size: 1.125rem;
+}
+
+.bankingDetails {
+  background: #f8f9fa;
+  padding: 1rem;
+  border-radius: 8px;
+}
+
+.detailRow {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+  color: #495057;
+}
+
+.detailRow span:first-child {
+  font-weight: 600;
+  color: #666;
+}
+
+.capitalize {
+  text-transform: capitalize;
+}
+
+.warning {
+  background: #fff3cd;
+  border: 1px solid #ffc107;
+  color: #856404;
+  padding: 1rem;
+  border-radius: 8px;
+  text-align: center;
+  font-weight: 600;
+}
+
+.previousPayouts {
+  background: #f8f9fa;
+  padding: 1rem;
+  border-radius: 8px;
+}
+
+.payoutRow {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+  color: #495057;
+  font-size: 0.875rem;
+}
+
+.reference {
+  color: #999;
+  font-family: monospace;
+}
+
+.input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  font-size: 1rem;
+  transition: border-color 0.2s;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #007bff;
+}
+
+.textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-family: inherit;
+  resize: vertical;
+  transition: border-color 0.2s;
+}
+
+.textarea:focus {
+  outline: none;
+  border-color: #007bff;
+}
+
+.modalFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  padding: 1.5rem;
+  border-top: 1px solid #e9ecef;
+}
+
+.cancelButton {
+  background: #6c757d;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.cancelButton:hover {
+  background: #5a6268;
+}
+
+.cancelButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.confirmButton {
+  background: #28a745;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.confirmButton:hover {
+  background: #218838;
+}
+
+.confirmButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

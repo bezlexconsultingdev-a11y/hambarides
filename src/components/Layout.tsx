@@ -44,10 +44,40 @@ export default function Layout() {
             Payouts
           </Link>
           <Link
+            to="/payouts-management"
+            className={location.pathname === '/payouts-management' ? styles.navLinkActive : styles.navLink}
+          >
+            💰 Payout Management
+          </Link>
+          <Link
+            to="/analytics"
+            className={location.pathname === '/analytics' ? styles.navLinkActive : styles.navLink}
+          >
+            📊 Financial Analytics
+          </Link>
+          <Link
+            to="/performance"
+            className={location.pathname === '/performance' ? styles.navLinkActive : styles.navLink}
+          >
+            📈 Driver Performance
+          </Link>
+          <Link
             to="/rides"
             className={location.pathname === '/rides' ? styles.navLinkActive : styles.navLink}
           >
             Rides
+          </Link>
+          <Link
+            to="/disputes"
+            className={location.pathname === '/disputes' ? styles.navLinkActive : styles.navLink}
+          >
+            ⚖️ Disputes
+          </Link>
+          <Link
+            to="/support"
+            className={location.pathname === '/support' ? styles.navLinkActive : styles.navLink}
+          >
+            🎫 Support Tickets
           </Link>
           <Link
             to="/sos"
@@ -72,6 +102,12 @@ export default function Layout() {
             className={location.pathname === '/pricing' ? styles.navLinkActive : styles.navLink}
           >
             Pricing
+          </Link>
+          <Link
+            to="/system-config"
+            className={location.pathname === '/system-config' ? styles.navLinkActive : styles.navLink}
+          >
+            ⚙️ System Config
           </Link>
           <Link
             to="/ride-drawer"

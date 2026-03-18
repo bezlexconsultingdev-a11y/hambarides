@@ -1,0 +1,299 @@
+.container {
+  padding: 2rem;
+  max-width: 1600px;
+  margin: 0 auto;
+  height: calc(100vh - 4rem);
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.header h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.filters {
+  display: flex;
+  gap: 1rem;
+}
+
+.select {
+  padding: 0.5rem 1rem;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  background: white;
+  cursor: pointer;
+}
+
+.content {
+  display: grid;
+  grid-template-columns: 400px 1fr;
+  gap: 1.5rem;
+  flex: 1;
+  overflow: hidden;
+}
+
+.ticketsList {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow-y: auto;
+  padding: 1rem;
+}
+
+.emptyState {
+  text-align: center;
+  padding: 3rem;
+  color: #999;
+}
+
+.ticketCard {
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+  cursor: pointer;
+  transition: background 0.2s;
+  border: 2px solid transparent;
+}
+
+.ticketCard:hover {
+  background: #f8f9fa;
+}
+
+.ticketCardActive {
+  background: #e7f3ff;
+  border-color: #007bff;
+}
+
+.ticketHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.5rem;
+}
+
+.ticketUser {
+  font-weight: 600;
+  color: #1a1a1a;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.userType {
+  font-size: 0.75rem;
+  background: #e9ecef;
+  padding: 0.125rem 0.5rem;
+  border-radius: 4px;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.ticketMeta {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.priorityBadge,
+.statusBadge {
+  font-size: 0.625rem;
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.ticketSubject {
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 0.5rem;
+}
+
+.ticketDescription {
+  font-size: 0.875rem;
+  color: #666;
+  margin-bottom: 0.5rem;
+  line-height: 1.4;
+}
+
+.ticketFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.75rem;
+  color: #999;
+}
+
+.category {
+  background: #f8f9fa;
+  padding: 0.125rem 0.5rem;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.ticketDetails {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.noSelection {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #999;
+  font-size: 1.125rem;
+}
+
+.detailsHeader {
+  padding: 1.5rem;
+  border-bottom: 1px solid #e9ecef;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.detailsHeader h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 0.5rem 0;
+}
+
+.detailsMeta {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  font-size: 0.875rem;
+  color: #666;
+}
+
+.statusActions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.statusSelect {
+  padding: 0.5rem 1rem;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  background: white;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.messagesContainer {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.5rem;
+}
+
+.initialMessage,
+.userMessage,
+.adminMessage {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  border-radius: 8px;
+}
+
+.initialMessage {
+  background: #f8f9fa;
+  border-left: 4px solid #007bff;
+}
+
+.userMessage {
+  background: #f8f9fa;
+}
+
+.adminMessage {
+  background: #e7f3ff;
+  border-left: 4px solid #007bff;
+}
+
+.messageHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.messageHeader strong {
+  color: #1a1a1a;
+}
+
+.messageTime {
+  font-size: 0.75rem;
+  color: #999;
+}
+
+.messageContent {
+  color: #495057;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+.replyBox {
+  padding: 1.5rem;
+  border-top: 1px solid #e9ecef;
+  background: #f8f9fa;
+}
+
+.replyTextarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-family: inherit;
+  resize: vertical;
+  margin-bottom: 1rem;
+}
+
+.replyTextarea:focus {
+  outline: none;
+  border-color: #007bff;
+}
+
+.sendButton {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.sendButton:hover {
+  background: #0056b3;
+}
+
+.sendButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.loading {
+  text-align: center;
+  padding: 3rem;
+  font-size: 1.125rem;
+  color: #666;
+}
