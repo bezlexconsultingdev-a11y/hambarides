@@ -13,6 +13,7 @@ import FinancialAnalyticsPage from './pages/FinancialAnalyticsPage';
 import SupportTicketsPage from './pages/SupportTicketsPage';
 import SystemConfigPage from './pages/SystemConfigPage';
 import DisputesPage from './pages/DisputesPage';
+import DriverPerformancePage from './pages/DriverPerformancePage';
 import RideDrawerDemoPage from './pages/RideDrawerDemoPage';
 import MapDemoPage from './pages/MapDemoPage';
 import SosEventsPage from './pages/SosEventsPage';
@@ -48,7 +49,8 @@ function AppRoutes() {
         <Route path="analytics" element={<FinancialAnalyticsPage />} />
         <Route path="support" element={<SupportTicketsPage />} />
         <Route path="system-config" element={<SystemConfigPage />} />
-        <Route path="disputes" element={<DisputesPage />} />
+        <Route path="/disputes" element={<ProtectedRoute><DisputesPage /></ProtectedRoute>} />
+        <Route path="performance" element={<ProtectedRoute><DriverPerformancePage /></ProtectedRoute>} />
         <Route path="rides" element={<RidesPage />} />
         <Route path="sos" element={<SosEventsPage />} />
         <Route path="receipts" element={<ReceiptsPage />} />
