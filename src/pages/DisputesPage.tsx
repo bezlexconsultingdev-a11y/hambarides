@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { adminApi } from '../api/admin';
+import { api } from '../api/client';
 import styles from './DisputesPage.module.css';
 
 interface Dispute {
@@ -38,7 +38,7 @@ export default function DisputesPage() {
       const params = new URLSearchParams();
       if (statusFilter !== 'all') params.append('status', statusFilter);
       
-      const response = await adminApi.get(`/disputes?${params.toString()}`);
+      const response = await api.get(`/admin/disputes?${params.toString()}`);
       setDisputes(response.data.disputes);
     } catch (error) {
       console.error('Failed to load disputes:', error);
@@ -55,7 +55,7 @@ export default function DisputesPage() {
 
     try {
       setResolving(true);
-      await adminApi.post(`/disputes/${selectedDispute.id}/resolve`, {
+      await api.post(`/admin/disputes/${selectedDispute.id}/resolve`, {
         resolution,
         status: 'resolved'
       });
@@ -78,7 +78,7 @@ export default function DisputesPage() {
 
     try {
       setResolving(true);
-      await adminApi.post(`/disputes/${selectedDispute.id}/resolve`, {
+      await api.post(`/admin/disputes/${selectedDispute.id}/resolve`, {
         resolution: 'Dispute dismissed - no action required',
         status: 'dismissed'
       });

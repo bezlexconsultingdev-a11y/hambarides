@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { adminApi } from '../api/admin';
+import { api } from '../api/client';
 import styles from './FinancialAnalyticsPage.module.css';
 
 interface RevenueData {
@@ -30,7 +30,7 @@ export default function FinancialAnalyticsPage() {
   const loadAnalytics = async () => {
     try {
       setLoading(true);
-      const response = await adminApi.get(`/analytics/revenue?period=${period}`);
+      const response = await api.get(`/admin/analytics/revenue?period=${period}`);
       const data = response.data.analytics;
       setAnalytics(data);
 

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { adminApi } from '../api/admin';
+import { api } from '../api/client';
 import styles from './PayoutsManagementPage.module.css';
 
 interface Driver {
@@ -59,7 +59,7 @@ export default function PayoutsManagementPage() {
   const loadDrivers = async () => {
     try {
       setLoading(true);
-      const response = await adminApi.get('/payouts/pending');
+      const response = await api.get('/admin/payouts/pending');
       setDrivers(response.data.drivers);
     } catch (error) {
       console.error('Failed to load drivers:', error);
@@ -70,7 +70,7 @@ export default function PayoutsManagementPage() {
 
   const handlePayNow = async (driverId: string) => {
     try {
-      const response = await adminApi.get(`/payouts/${driverId}/details`);
+      const response = await api.get(`/admin/payouts/${driverId}/details`);
       setSelectedDriver(response.data);
       setPayoutAmount(response.data.driver.available_balance.toString());
       setShowPayoutModal(true);
@@ -105,7 +105,7 @@ export default function PayoutsManagementPage() {
 
     try {
       setProcessingPayout(true);
-      await adminApi.post(`/payouts/${selectedDriver.driver.id}/process`, {
+      await api.post(`/admin/payouts/${selectedDriver.driver.id}/process`, {
         amount,
         notes: payoutNotes
       });

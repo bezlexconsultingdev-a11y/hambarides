@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { adminApi } from '../api/admin';
+import { api } from '../api/client';
 import styles from './SupportTicketsPage.module.css';
 
 interface Ticket {
@@ -48,7 +48,7 @@ export default function SupportTicketsPage() {
       if (statusFilter !== 'all') params.append('status', statusFilter);
       if (priorityFilter !== 'all') params.append('priority', priorityFilter);
       
-      const response = await adminApi.get(`/support/tickets?${params.toString()}`);
+      const response = await api.get(`/admin/support/tickets?${params.toString()}`);
       setTickets(response.data.tickets);
     } catch (error) {
       console.error('Failed to load tickets:', error);
@@ -59,7 +59,7 @@ export default function SupportTicketsPage() {
 
   const loadTicketDetails = async (ticketId: string) => {
     try {
-      const response = await adminApi.get(`/support/tickets/${ticketId}`);
+      const response = await api.get(`/admin/support/tickets/${ticketId}`);
       setMessages(response.data.messages);
     } catch (error) {
       console.error('Failed to load ticket details:', error);
@@ -76,7 +76,7 @@ export default function SupportTicketsPage() {
 
     try {
       setSending(true);
-      await adminApi.post(`/support/tickets/${selectedTicket.id}/reply`, {
+      await api.post(`/admin/support/tickets/${selectedTicket.id}/reply`, {
         message: replyText
       });
       setReplyText('');
@@ -94,7 +94,7 @@ export default function SupportTicketsPage() {
     if (!selectedTicket) return;
 
     try {
-      await adminApi.patch(`/support/tickets/${selectedTicket.id}/status`, { status });
+      await api.patch(`/admin/support/tickets/${selectedTicket.id}/status`, { status });
       setSelectedTicket({ ...selectedTicket, status });
       await loadTickets();
     } catch (error) {

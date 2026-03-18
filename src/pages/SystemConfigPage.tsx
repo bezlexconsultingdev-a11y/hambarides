@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { adminApi } from '../api/admin';
+import { api } from '../api/client';
 import styles from './SystemConfigPage.module.css';
 
 interface ConfigItem {
@@ -13,7 +13,6 @@ interface ConfigItem {
 export default function SystemConfigPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [configs, setConfigs] = useState<ConfigItem[]>([]);
   
   // Pricing configuration
   const [baseFare, setBaseFare] = useState('15.00');
@@ -40,9 +39,8 @@ export default function SystemConfigPage() {
   const loadConfigs = async () => {
     try {
       setLoading(true);
-      const response = await adminApi.get('/config');
+      const response = await api.get('/admin/config');
       const configData = response.data.configs || [];
-      setConfigs(configData);
       
       // Parse and set values
       configData.forEach((config: ConfigItem) => {
@@ -121,7 +119,7 @@ export default function SystemConfigPage() {
         }
       ];
 
-      await adminApi.post('/config/bulk-update', { configs: configUpdates });
+      await api.post('/admin/config/bulk-update', { configs: configUpdates });
       alert('Configuration saved successfully!');
       await loadConfigs();
     } catch (error: any) {
