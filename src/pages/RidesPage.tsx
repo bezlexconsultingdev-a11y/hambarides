@@ -36,6 +36,7 @@ export default function RidesPage() {
   const [rides, setRides] = useState<RideRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<string>('');
+  const [rideTypeFilter, setRideTypeFilter] = useState<string>('');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
 
@@ -48,6 +49,9 @@ export default function RidesPage() {
 
   const filteredRides = useMemo(() => {
     let list = rides;
+    if (rideTypeFilter) {
+      list = list.filter((r) => r.ride_type === rideTypeFilter);
+    }
     if (dateFrom) {
       const from = new Date(dateFrom);
       list = list.filter((r) => new Date(r.requested_at) >= from);
@@ -58,7 +62,7 @@ export default function RidesPage() {
       list = list.filter((r) => new Date(r.requested_at) <= to);
     }
     return list;
-  }, [rides, dateFrom, dateTo]);
+  }, [rides, rideTypeFilter, dateFrom, dateTo]);
 
   const totalPlatform = useMemo(
     () => filteredRides.reduce((sum, r) => sum + (r.fare_amount != null ? Number(r.fare_amount) * PLATFORM_SHARE : 0), 0),
@@ -83,6 +87,17 @@ export default function RidesPage() {
           <option value="in_progress">In progress</option>
           <option value="completed">Completed</option>
           <option value="cancelled">Cancelled</option>
+        </select>
+        <select
+          value={rideTypeFilter}
+          onChange={(e) => setRideTypeFilter(e.target.value)}
+          className={styles.select}
+        >
+          <option value="">All ride types</option>
+          <option value="economy">Economy</option>
+          <option value="economy_women">Economy Women</option>
+          <option value="standard">Standard</option>
+          <option value="standard_women">Standard Women</option>
         </select>
         <label className={styles.dateLabel}>
           From
