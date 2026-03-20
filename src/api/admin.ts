@@ -227,17 +227,83 @@ export async function getPendingApplications(params?: { limit?: number }): Promi
 }
 
 export async function approveApplication(id: number): Promise<{ application: DriverApplicationRow }> {
-  const { error } = await supabase.from('driver_applications').update({ status: 'approved' }).eq('id', id);
+  // 1. Get the application to find the driver_id and selfie_url
+  const { data: app, error: fetchErr } = await supabase
+    .from('driver_applications')
+    .select('*')
+    .eq('id', id)
+    .single();
+  if (fetchErr || !app) throw fetchErr || new Error('Application not found');
+
+  // 2. Update application status
+  const { error } = await supabase
+    .from('driver_applications')
+    .update({ status: 'approved', reviewed_at: new Date().toISOString() })
+    .eq('id', id);
   if (error) throw error;
-  const { data } = await supabase.from('driver_applications').select('*').eq('id', id).single();
-  return { application: data as unknown as DriverApplicationRow };
+
+  // 3. Update driver's verification_status to 'approved' + set profile photo from selfie
+  const { error: driverErr } = await supabase
+    .from('drivers')
+    .update({
+      verification_status: 'approved',
+      profile_photo_url: app.selfie_url || null,
+    })
+    .eq('id', app.driver_id);
+  if (driverErr) console.error('Failed to update driver status:', driverErr);
+
+  // 4. Try to send approval email via backend (if running)
+  try {
+    const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+    await fetch(`${backendUrl}/api/admin/drivers/applications/${id}/approve`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+    }).catch(() => {}); // silent fail if backend not reachable
+  } catch {}
+
+  const { data: updated } = await supabase.from('driver_applications').select('*').eq('id', id).single();
+  return { application: updated as unknown as DriverApplicationRow };
 }
 
-export async function declineApplication(id: number, _reason?: string): Promise<{ application: DriverApplicationRow }> {
-  const { error } = await supabase.from('driver_applications').update({ status: 'declined' }).eq('id', id);
+export async function declineApplication(id: number, reason?: string): Promise<{ application: DriverApplicationRow }> {
+  // 1. Get the application to find the driver_id
+  const { data: app, error: fetchErr } = await supabase
+    .from('driver_applications')
+    .select('*')
+    .eq('id', id)
+    .single();
+  if (fetchErr || !app) throw fetchErr || new Error('Application not found');
+
+  // 2. Update application status + decline reason
+  const { error } = await supabase
+    .from('driver_applications')
+    .update({
+      status: 'declined',
+      decline_reason: reason || null,
+      reviewed_at: new Date().toISOString(),
+    })
+    .eq('id', id);
   if (error) throw error;
-  const { data } = await supabase.from('driver_applications').select('*').eq('id', id).single();
-  return { application: data as unknown as DriverApplicationRow };
+
+  // 3. Update driver's verification_status to 'declined'
+  const { error: driverErr } = await supabase
+    .from('drivers')
+    .update({ verification_status: 'declined' })
+    .eq('id', app.driver_id);
+  if (driverErr) console.error('Failed to update driver status:', driverErr);
+
+  // 4. Try to send denial email via backend (if running)
+  try {
+    const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+    await fetch(`${backendUrl}/api/admin/drivers/applications/${id}/decline`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ reason }),
+    }).catch(() => {});
+  } catch {}
+
+  const { data: updated } = await supabase.from('driver_applications').select('*').eq('id', id).single();
+  return { application: updated as unknown as DriverApplicationRow };
 }
 
 export interface RideRow {
