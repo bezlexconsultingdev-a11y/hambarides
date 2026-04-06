@@ -14,6 +14,9 @@ import SupportTicketsPage from './pages/SupportTicketsPage';
 import SystemConfigPage from './pages/SystemConfigPage';
 import DisputesPage from './pages/DisputesPage';
 import DriverPerformancePage from './pages/DriverPerformancePage';
+import DriverApplicationsEnhancedPage from './pages/DriverApplicationsEnhancedPage';
+import SOSAlertsPage from './pages/SOSAlertsPage';
+import TripSharingAnalyticsPage from './pages/TripSharingAnalyticsPage';
 import RideDrawerDemoPage from './pages/RideDrawerDemoPage';
 import MapDemoPage from './pages/MapDemoPage';
 import SosEventsPage from './pages/SosEventsPage';
@@ -44,6 +47,9 @@ function AppRoutes() {
         <Route path="users" element={<UsersPage />} />
         <Route path="drivers" element={<DriversPage />} />
         <Route path="applications" element={<ApplicationsPage />} />
+        <Route path="applications-enhanced" element={<DriverApplicationsEnhancedPage />} />
+        <Route path="sos-alerts" element={<SOSAlertsPage />} />
+        <Route path="trip-sharing" element={<TripSharingAnalyticsPage />} />
         <Route path="payouts" element={<PayoutsPage />} />
         <Route path="payouts-management" element={<PayoutsManagementPage />} />
         <Route path="analytics" element={<FinancialAnalyticsPage />} />
