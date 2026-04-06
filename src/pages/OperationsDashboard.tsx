@@ -354,7 +354,7 @@ export default function OperationsDashboard() {
         </div>
       </div>
 
-      <style jsx>{`
+      <style>{`
         .operations-dashboard {
           height: 100vh;
           display: flex;
