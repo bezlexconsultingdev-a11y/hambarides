@@ -23,6 +23,7 @@ import SosEventsPage from './pages/SosEventsPage';
 import ReceiptsPage from './pages/ReceiptsPage';
 import TripLogsPage from './pages/TripLogsPage';
 import PricingPage from './pages/PricingPage';
+import Notifications from './pages/Notifications';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
@@ -62,6 +63,7 @@ function AppRoutes() {
         <Route path="receipts" element={<ReceiptsPage />} />
         <Route path="trip-logs" element={<TripLogsPage />} />
         <Route path="pricing" element={<PricingPage />} />
+        <Route path="notifications" element={<Notifications />} />
         <Route path="ride-drawer" element={<RideDrawerDemoPage />} />
         <Route path="map" element={<MapDemoPage />} />
       </Route>

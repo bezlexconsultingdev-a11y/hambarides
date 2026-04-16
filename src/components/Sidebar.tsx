@@ -17,7 +17,8 @@ import {
   FileText,
   MessageSquare,
   Scale,
-  TrendingUp
+  TrendingUp,
+  Bell
 } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -79,6 +80,12 @@ const menuItems: MenuItem[] = [
       { id: 'disputes', label: 'Disputes', icon: <Scale className="w-4 h-4" />, path: '/disputes' },
       { id: 'performance', label: 'Performance', icon: <TrendingUp className="w-4 h-4" />, path: '/driver-performance' },
     ],
+  },
+  {
+    id: 'notifications',
+    label: 'Notifications',
+    icon: <Bell className="w-5 h-5" />,
+    path: '/notifications',
   },
 ];
 
