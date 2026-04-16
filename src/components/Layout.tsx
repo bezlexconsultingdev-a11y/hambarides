@@ -97,24 +97,6 @@ export default function Layout() {
           >
             Trip logs
           </Link>
-          <Link
-            to="/pricing"
-            className={location.pathname === '/pricing' ? styles.navLinkActive : styles.navLink}
-          >
-            Pricing
-          </Link>
-          <Link
-            to="/system-config"
-            className={location.pathname === '/system-config' ? styles.navLinkActive : styles.navLink}
-          >
-            ⚙️ System Config
-          </Link>
-          <Link
-            to="/ride-drawer"
-            className={location.pathname === '/ride-drawer' ? styles.navLinkActive : styles.navLink}
-          >
-            Ride drawer
-          </Link>
         </nav>
         <div className={styles.sidebarFooter}>
           <span className={styles.userEmail}>{user?.email}</span>
