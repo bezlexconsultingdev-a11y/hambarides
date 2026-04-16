@@ -82,34 +82,6 @@ export default function Notifications() {
     });
   };
 
-  const setTemplate = (type: string) => {
-    if (type === 'rider-promotion') {
-      setUserType('rider');
-      setTitle('🎉 Special Promotion');
-      setBody('Get 20% off your next 5 rides! Use code SAVE20');
-    } else if (type === 'rider-maintenance') {
-      setUserType('rider');
-      setTitle('⚠️ Service Update');
-      setBody('We will be performing maintenance on Sunday from 2am-4am. Service may be temporarily unavailable.');
-    } else if (type === 'rider-feature') {
-      setUserType('rider');
-      setTitle('🎊 New Feature');
-      setBody('You can now schedule rides up to 7 days in advance! Check it out in the app.');
-    } else if (type === 'driver-boost') {
-      setUserType('driver');
-      setTitle('💰 Earnings Boost');
-      setBody('Drive during peak hours this weekend and earn 1.5x! Friday 5pm-10pm, Saturday 12pm-8pm.');
-    } else if (type === 'driver-document') {
-      setUserType('driver');
-      setTitle('📋 Document Reminder');
-      setBody('Your vehicle license expires in 30 days. Please update your documents to continue driving.');
-    } else if (type === 'driver-rating') {
-      setUserType('driver');
-      setTitle('⭐ Rating Milestone');
-      setBody('Congratulations! You have maintained a 4.8+ rating for 3 months. Keep up the great work!');
-    }
-  };
-
   return (
     <div className="p-6">
       {/* Header */}
@@ -146,9 +118,9 @@ export default function Notifications() {
 
       {/* Send Notification Tab */}
       {tab === 'send' && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="max-w-3xl">
           {/* Send Form */}
-          <div className="lg:col-span-2">
+          <div>
             <div className="bg-white rounded-lg shadow p-6">
               <h2 className="text-xl font-semibold mb-4">Send Push Notification</h2>
 
@@ -239,63 +211,6 @@ export default function Notifications() {
                   </>
                 )}
               </button>
-            </div>
-          </div>
-
-          {/* Quick Templates */}
-          <div>
-            <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-xl font-semibold mb-4">Quick Templates</h2>
-
-              <div className="space-y-4">
-                <div>
-                  <h3 className="text-sm font-medium text-gray-700 mb-2">Rider Templates</h3>
-                  <div className="space-y-2">
-                    <button
-                      onClick={() => setTemplate('rider-promotion')}
-                      className="w-full text-left px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm"
-                    >
-                      🎉 Promotion
-                    </button>
-                    <button
-                      onClick={() => setTemplate('rider-maintenance')}
-                      className="w-full text-left px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm"
-                    >
-                      ⚠️ Maintenance
-                    </button>
-                    <button
-                      onClick={() => setTemplate('rider-feature')}
-                      className="w-full text-left px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm"
-                    >
-                      🎊 New Feature
-                    </button>
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="text-sm font-medium text-gray-700 mb-2">Driver Templates</h3>
-                  <div className="space-y-2">
-                    <button
-                      onClick={() => setTemplate('driver-boost')}
-                      className="w-full text-left px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm"
-                    >
-                      💰 Earnings Boost
-                    </button>
-                    <button
-                      onClick={() => setTemplate('driver-document')}
-                      className="w-full text-left px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm"
-                    >
-                      📋 Document Reminder
-                    </button>
-                    <button
-                      onClick={() => setTemplate('driver-rating')}
-                      className="w-full text-left px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm"
-                    >
-                      ⭐ Rating Milestone
-                    </button>
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
         </div>
