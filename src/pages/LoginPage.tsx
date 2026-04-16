@@ -35,8 +35,12 @@ export default function LoginPage() {
       <div className="relative w-full max-w-md">
         {/* Logo & Branding */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-green-600 to-green-700 rounded-2xl shadow-lg mb-4">
-            <span className="text-white text-3xl font-bold">H</span>
+          <div className="inline-flex items-center justify-center mb-4">
+            <img 
+              src="/logo.png" 
+              alt="Hamba Rides Logo" 
+              className="w-20 h-20 rounded-2xl shadow-lg"
+            />
           </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Hamba Rides</h1>
           <p className="text-gray-600">Admin Dashboard</p>
@@ -70,7 +74,7 @@ export default function LoginPage() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+                  className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all text-gray-900 placeholder-gray-400"
                   placeholder="admin@hambarides.co.za"
                   required
                   autoComplete="email"
@@ -91,7 +95,7 @@ export default function LoginPage() {
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="block w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all"
+                  className="block w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all text-gray-900 placeholder-gray-400"
                   placeholder="••••••••"
                   required
                   autoComplete="current-password"
@@ -108,16 +112,6 @@ export default function LoginPage() {
                   )}
                 </button>
               </div>
-            </div>
-
-            {/* Forgot Password Link */}
-            <div className="flex items-center justify-end">
-              <button
-                type="button"
-                className="text-sm text-green-600 hover:text-green-700 font-medium"
-              >
-                Forgot password?
-              </button>
             </div>
 
             {/* Sign In Button */}
