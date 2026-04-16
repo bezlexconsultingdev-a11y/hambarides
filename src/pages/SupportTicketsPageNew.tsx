@@ -162,7 +162,7 @@ export default function SupportTicketsPageNew() {
         searchable
         exportable
         pageSize={10}
-        actions={(ticket) => (
+        actions={() => (
           <div className="flex items-center gap-2">
             <button className="p-1 text-blue-600 hover:bg-blue-50 rounded">
               <Eye className="w-4 h-4" />

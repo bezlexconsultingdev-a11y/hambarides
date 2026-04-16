@@ -166,7 +166,7 @@ export default function RidesPageNew() {
         exportable
         pageSize={10}
         onRowClick={(ride) => navigate(`/rides/${ride.id}`)}
-        actions={(ride) => (
+        actions={() => (
           <div className="flex items-center gap-2">
             <button className="p-1 text-blue-600 hover:bg-blue-50 rounded">
               <Eye className="w-4 h-4" />

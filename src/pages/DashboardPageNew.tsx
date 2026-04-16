@@ -5,7 +5,7 @@ import type { DashboardStats } from '../api/admin';
 import StatCard from '../components/StatCard';
 import QuickActionCard from '../components/QuickActionCard';
 import StatusBadge from '../components/StatusBadge';
-import { formatCurrency, formatRelativeTime, getStatusVariant } from '../lib/utils';
+import { formatCurrency, getStatusVariant } from '../lib/utils';
 import { 
   DollarSign, 
   Car, 
@@ -17,8 +17,6 @@ import {
   Eye
 } from 'lucide-react';
 import {
-  LineChart,
-  Line,
   AreaChart,
   Area,
   PieChart,

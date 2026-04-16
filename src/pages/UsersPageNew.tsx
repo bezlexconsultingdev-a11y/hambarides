@@ -4,7 +4,7 @@ import StatCard from '../components/StatCard';
 import DataTable from '../components/DataTable';
 import StatusBadge from '../components/StatusBadge';
 import { formatDateTime, getStatusVariant } from '../lib/utils';
-import { Users, UserCheck, UserX, Eye, Edit, Ban } from 'lucide-react';
+import { Users, UserCheck, Eye, Edit, Ban } from 'lucide-react';
 
 interface User {
   id: number;
@@ -172,7 +172,7 @@ export default function UsersPageNew() {
         exportable
         pageSize={10}
         onRowClick={(user) => navigate(`/users/${user.id}`)}
-        actions={(user) => (
+        actions={() => (
           <div className="flex items-center gap-2">
             <button className="p-1 text-blue-600 hover:bg-blue-50 rounded">
               <Eye className="w-4 h-4" />

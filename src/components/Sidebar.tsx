@@ -4,7 +4,6 @@ import {
   Car, 
   DollarSign, 
   ClipboardList, 
-  Settings,
   ChevronDown,
   ChevronRight,
   UserCircle,
@@ -18,10 +17,7 @@ import {
   FileText,
   MessageSquare,
   Scale,
-  TrendingUp,
-  Sliders,
-  Database,
-  Share2
+  TrendingUp
 } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
