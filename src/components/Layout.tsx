@@ -97,6 +97,12 @@ export default function Layout() {
           >
             Trip logs
           </Link>
+          <Link
+            to="/notifications"
+            className={location.pathname === '/notifications' ? styles.navLinkActive : styles.navLink}
+          >
+            🔔 Notifications
+          </Link>
         </nav>
         <div className={styles.sidebarFooter}>
           <span className={styles.userEmail}>{user?.email}</span>
