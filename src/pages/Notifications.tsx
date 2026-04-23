@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Bell, Send, History, AlertCircle, CheckCircle } from 'lucide-react';
 import axios from 'axios';
+import { supabase } from '../lib/supabase';
 
 const API_URL = import.meta.env.VITE_API_URL || 'https://hamba-rides-backend.onrender.com/api';
+const ADMIN_NOTIFICATIONS_API_KEY = import.meta.env.VITE_ADMIN_NOTIFICATIONS_API_KEY || '';
 
 interface NotificationHistory {
   id: string;
@@ -29,9 +31,22 @@ export default function Notifications() {
     }
   }, [tab]);
 
+  const getRequestHeaders = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    const headers: Record<string, string> = {};
+    if (session?.access_token) {
+      headers.Authorization = `Bearer ${session.access_token}`;
+    }
+    if (ADMIN_NOTIFICATIONS_API_KEY) {
+      headers['x-admin-api-key'] = ADMIN_NOTIFICATIONS_API_KEY;
+    }
+    return headers;
+  };
+
   const fetchHistory = async () => {
     try {
-      const response = await axios.get(`${API_URL}/notifications/history`);
+      const headers = await getRequestHeaders();
+      const response = await axios.get(`${API_URL}/notifications/history`, { headers });
       setHistory(response.data.history);
     } catch (err) {
       console.error('Error fetching history:', err);
@@ -49,11 +64,14 @@ export default function Notifications() {
     setSuccess('');
 
     try {
+      const headers = await getRequestHeaders();
+      const idempotencyKey = `admin-${userType}-${Date.now()}-${title.trim().slice(0, 24)}`;
       const response = await axios.post(`${API_URL}/notifications/broadcast`, {
         userType,
         title,
         body,
-      });
+        idempotencyKey,
+      }, { headers });
 
       setSuccess(`Notification sent to ${response.data.sentCount} ${userType}s successfully!`);
       setTitle('');

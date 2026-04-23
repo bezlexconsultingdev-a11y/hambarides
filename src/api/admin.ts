@@ -254,7 +254,7 @@ export async function approveApplication(id: number): Promise<{ application: Dri
 
   // 4. Try to send approval email via backend (if running)
   try {
-    const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+    const backendUrl = (import.meta.env.VITE_API_URL || 'http://localhost:5000/api').replace(/\/api\/?$/, '');
     await fetch(`${backendUrl}/api/admin/drivers/applications/${id}/approve`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -294,7 +294,7 @@ export async function declineApplication(id: number, reason?: string): Promise<{
 
   // 4. Try to send denial email via backend (if running)
   try {
-    const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+    const backendUrl = (import.meta.env.VITE_API_URL || 'http://localhost:5000/api').replace(/\/api\/?$/, '');
     await fetch(`${backendUrl}/api/admin/drivers/applications/${id}/decline`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
