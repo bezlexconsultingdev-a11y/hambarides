@@ -142,7 +142,7 @@ export default function LoginPage() {
         {/* Bottom Text */}
         <div className="mt-6 text-center">
           <p className="text-sm text-gray-600">
-            © 2024 Hamba Rides. All rights reserved.
+            © 2026 Hamba Rides. All rights reserved.
           </p>
         </div>
       </div>
