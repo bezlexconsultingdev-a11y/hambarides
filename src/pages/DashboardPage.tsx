@@ -9,10 +9,32 @@ export default function DashboardPage() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    getDashboard()
-      .then((d) => setStats(d.stats))
-      .catch(() => setError('Failed to load dashboard'))
-      .finally(() => setLoading(false));
+    let mounted = true;
+    const load = () =>
+      getDashboard()
+        .then((d) => {
+          if (!mounted) return;
+          setStats(d.stats);
+          setError('');
+        })
+        .catch(() => {
+          if (!mounted) return;
+          setError('Failed to load dashboard');
+        })
+        .finally(() => {
+          if (!mounted) return;
+          setLoading(false);
+        });
+
+    void load();
+    const id = setInterval(() => {
+      void load();
+    }, 15000);
+
+    return () => {
+      mounted = false;
+      clearInterval(id);
+    };
   }, []);
 
   if (loading) return <div className={styles.loading}>Loading...</div>;

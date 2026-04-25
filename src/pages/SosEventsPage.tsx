@@ -8,10 +8,31 @@ export default function SosEventsPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getSosEvents({ limit: 100 })
-      .then((d) => setEvents(d.events))
-      .catch(() => setEvents([]))
-      .finally(() => setLoading(false));
+    let mounted = true;
+    const load = () =>
+      getSosEvents({ limit: 100 })
+        .then((d) => {
+          if (!mounted) return;
+          setEvents(d.events);
+        })
+        .catch(() => {
+          if (!mounted) return;
+          setEvents([]);
+        })
+        .finally(() => {
+          if (!mounted) return;
+          setLoading(false);
+        });
+
+    void load();
+    const id = setInterval(() => {
+      void load();
+    }, 10000);
+
+    return () => {
+      mounted = false;
+      clearInterval(id);
+    };
   }, []);
 
   if (loading) return <div className={styles.loading}>Loading...</div>;

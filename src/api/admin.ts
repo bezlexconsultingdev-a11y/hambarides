@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabase';
+import { api } from './client';
 
 export interface DashboardStats {
   totalUsers: number;
@@ -14,49 +15,8 @@ export interface DashboardStats {
 }
 
 export async function getDashboard(): Promise<{ stats: DashboardStats }> {
-  const [
-    usersRes,
-    driversRes,
-    ridesRes,
-    completedRes,
-    pendingRes,
-    receiptsRes,
-  ] = await Promise.all([
-    supabase.from('users').select('id, user_type', { count: 'exact', head: true }),
-    supabase.from('drivers').select('id', { count: 'exact', head: true }),
-    supabase.from('rides').select('id', { count: 'exact', head: true }),
-    supabase.from('rides').select('id', { count: 'exact', head: true }).eq('status', 'completed'),
-    supabase.from('rides').select('id', { count: 'exact', head: true }).in('status', ['pending', 'requested', 'searching', 'accepted']),
-    supabase.from('receipts').select('fare_amount'),
-  ]);
-
-  const totalUsers = usersRes.count ?? 0;
-  const totalDrivers = driversRes.count ?? 0;
-  const totalRides = ridesRes.count ?? 0;
-  const completedRides = completedRes.count ?? 0;
-  const pendingRides = pendingRes.count ?? 0;
-
-  const receipts = receiptsRes.data ?? [];
-  const totalRevenue = receipts.reduce((sum, r) => sum + Number(r.fare_amount ?? 0), 0);
-  const totalCommission = totalRevenue * 0.21;
-  const totalToPayout = receipts.reduce((sum, r) => sum + Number(r.fare_amount ?? 0) * 0.79, 0);
-
-  const riderCountRes = await supabase.from('users').select('id', { count: 'exact', head: true }).eq('user_type', 'rider');
-  const totalRiders = riderCountRes.count ?? 0;
-
-  const stats: DashboardStats = {
-    totalUsers,
-    totalRiders,
-    totalDrivers,
-    totalRides,
-    completedRides,
-    pendingRides,
-    totalRevenue,
-    totalCommission,
-    totalCommissionOwed: 0,
-    totalToPayout,
-  };
-  return { stats };
+  const { data } = await api.get('/admin/dashboard');
+  return data as { stats: DashboardStats };
 }
 
 export interface UserRow {
@@ -175,135 +135,20 @@ export interface DriverApplicationRow {
 }
 
 export async function getPendingApplications(params?: { limit?: number }): Promise<{ applications: DriverApplicationRow[] }> {
-  const limit = params?.limit ?? 100;
-  const { data: appData } = await supabase
-    .from('driver_applications')
-    .select('*')
-    .eq('status', 'pending')
-    .order('created_at', { ascending: false })
-    .limit(limit);
-
-  const list = appData ?? [];
-  const driverIds = [...new Set(list.map((a) => a.driver_id).filter(Boolean))];
-  const driverMap: Record<string, { user_id: string }> = {};
-  if (driverIds.length > 0) {
-    const { data: drData } = await supabase.from('drivers').select('id, user_id').in('id', driverIds);
-    (drData ?? []).forEach((d) => { driverMap[String(d.id)] = { user_id: d.user_id as string }; });
-  }
-  const userIds = [...new Set(Object.values(driverMap).map((d) => d.user_id))];
-  const userMap: Record<string, { first_name?: string; last_name?: string; email?: string }> = {};
-  if (userIds.length > 0) {
-    const { data: uData } = await supabase.from('users').select('id, first_name, last_name, email').in('id', userIds);
-    (uData ?? []).forEach((u) => { userMap[u.id] = u; });
-  }
-
-  const applications: DriverApplicationRow[] = list.map((a) => {
-    const dr = driverMap[String(a.driver_id)] ?? {};
-    const u = userMap[dr.user_id] ?? {};
-    const email = (a.email as string) ?? u.email ?? '';
-    const fullName = (a.full_name as string) ?? ([u.first_name, u.last_name].filter(Boolean).join(' ') || email);
-    return {
-      id: Number(a.id),
-      driver_id: Number(a.driver_id),
-      user_id: dr.user_id ?? '',
-      email,
-      full_name: fullName,
-      country_of_birth: String(a.country_of_birth ?? ''),
-      address: String(a.address ?? ''),
-      id_document_url: String(a.id_document_url ?? ''),
-      selfie_url: String(a.selfie_url ?? ''),
-      police_clearance_url: String(a.police_clearance_url ?? ''),
-      police_clearance_issue_date: String(a.police_clearance_issue_date ?? ''),
-      vehicle_photos_urls: String(a.vehicle_photos_urls ?? ''),
-      drivers_license_url: String(a.drivers_license_url ?? ''),
-      license_expiry_date: a.license_expiry_date ?? null,
-      prdp_url: a.prdp_url ?? null,
-      commercial_insurance_url: a.commercial_insurance_url ?? null,
-      status: String(a.status ?? 'pending'),
-      submitted_at: String(a.created_at ?? ''),
-    };
+  const { data } = await api.get('/admin/drivers/applications/pending', {
+    params: { limit: params?.limit ?? 100 },
   });
-  return { applications };
+  return data as { applications: DriverApplicationRow[] };
 }
 
 export async function approveApplication(id: number): Promise<{ application: DriverApplicationRow }> {
-  // 1. Get the application to find the driver_id and selfie_url
-  const { data: app, error: fetchErr } = await supabase
-    .from('driver_applications')
-    .select('*')
-    .eq('id', id)
-    .single();
-  if (fetchErr || !app) throw fetchErr || new Error('Application not found');
-
-  // 2. Update application status
-  const { error } = await supabase
-    .from('driver_applications')
-    .update({ status: 'approved', reviewed_at: new Date().toISOString() })
-    .eq('id', id);
-  if (error) throw error;
-
-  // 3. Update driver's verification_status to 'approved' + set profile photo from selfie
-  const { error: driverErr } = await supabase
-    .from('drivers')
-    .update({
-      verification_status: 'approved',
-      profile_photo_url: app.selfie_url || null,
-    })
-    .eq('id', app.driver_id);
-  if (driverErr) console.error('Failed to update driver status:', driverErr);
-
-  // 4. Try to send approval email via backend (if running)
-  try {
-    const backendUrl = (import.meta.env.VITE_API_URL || 'http://localhost:5000/api').replace(/\/api\/?$/, '');
-    await fetch(`${backendUrl}/api/admin/drivers/applications/${id}/approve`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-    }).catch(() => {}); // silent fail if backend not reachable
-  } catch {}
-
-  const { data: updated } = await supabase.from('driver_applications').select('*').eq('id', id).single();
-  return { application: updated as unknown as DriverApplicationRow };
+  const { data } = await api.post(`/admin/drivers/applications/${id}/approve`);
+  return data as { application: DriverApplicationRow };
 }
 
 export async function declineApplication(id: number, reason?: string): Promise<{ application: DriverApplicationRow }> {
-  // 1. Get the application to find the driver_id
-  const { data: app, error: fetchErr } = await supabase
-    .from('driver_applications')
-    .select('*')
-    .eq('id', id)
-    .single();
-  if (fetchErr || !app) throw fetchErr || new Error('Application not found');
-
-  // 2. Update application status + decline reason
-  const { error } = await supabase
-    .from('driver_applications')
-    .update({
-      status: 'declined',
-      decline_reason: reason || null,
-      reviewed_at: new Date().toISOString(),
-    })
-    .eq('id', id);
-  if (error) throw error;
-
-  // 3. Update driver's verification_status to 'declined'
-  const { error: driverErr } = await supabase
-    .from('drivers')
-    .update({ verification_status: 'declined' })
-    .eq('id', app.driver_id);
-  if (driverErr) console.error('Failed to update driver status:', driverErr);
-
-  // 4. Try to send denial email via backend (if running)
-  try {
-    const backendUrl = (import.meta.env.VITE_API_URL || 'http://localhost:5000/api').replace(/\/api\/?$/, '');
-    await fetch(`${backendUrl}/api/admin/drivers/applications/${id}/decline`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ reason }),
-    }).catch(() => {});
-  } catch {}
-
-  const { data: updated } = await supabase.from('driver_applications').select('*').eq('id', id).single();
-  return { application: updated as unknown as DriverApplicationRow };
+  const { data } = await api.post(`/admin/drivers/applications/${id}/decline`, { reason });
+  return data as { application: DriverApplicationRow };
 }
 
 export interface RideRow {
@@ -401,13 +246,10 @@ export interface SosEventRow {
 }
 
 export async function getSosEvents(params?: { limit?: number }): Promise<{ events: SosEventRow[] }> {
-  const limit = params?.limit ?? 100;
-  const { data } = await supabase
-    .from('sos_events')
-    .select('id, ride_id, user_id, latitude, longitude, emergency_phone, created_at')
-    .order('created_at', { ascending: false })
-    .limit(limit);
-  return { events: (data ?? []) as SosEventRow[] };
+  const { data } = await api.get('/admin/sos/events', {
+    params: { limit: params?.limit ?? 100 },
+  });
+  return data as { events: SosEventRow[] };
 }
 
 // Receipts (admin RLS allows)

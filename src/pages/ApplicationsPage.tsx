@@ -29,6 +29,10 @@ export default function ApplicationsPage() {
 
   useEffect(() => {
     loadApplications();
+    const id = setInterval(() => {
+      loadApplications();
+    }, 15000);
+    return () => clearInterval(id);
   }, [loadApplications]);
 
   const handleApprove = (id: number) => {
