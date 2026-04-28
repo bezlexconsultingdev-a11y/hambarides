@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet';
 import { supabase } from '../lib/supabase';
+import { api } from '../api/client';
+import { io as ioClient, type Socket } from 'socket.io-client';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 
@@ -34,6 +36,15 @@ interface DashboardStats {
   completedToday: number;
 }
 
+interface OpsEvent {
+  id: number | string;
+  entity_type: string;
+  title: string;
+  description: string;
+  severity: 'info' | 'warning' | 'critical';
+  created_at: string;
+}
+
 export default function OperationsDashboard() {
   const [activeRides, setActiveRides] = useState<ActiveRide[]>([]);
   const [stats, setStats] = useState<DashboardStats>({
@@ -43,10 +54,14 @@ export default function OperationsDashboard() {
     completedToday: 0,
   });
   const [selectedRide, setSelectedRide] = useState<ActiveRide | null>(null);
+  const [opsEvents, setOpsEvents] = useState<OpsEvent[]>([]);
+  const [opsSummary, setOpsSummary] = useState<Record<string, number>>({});
 
   useEffect(() => {
     fetchActiveRides();
     fetchStats();
+    void fetchOpsEvents();
+    void fetchOpsSummary();
 
     // Subscribe to real-time updates
     const ridesChannel = supabase
@@ -69,13 +84,46 @@ export default function OperationsDashboard() {
     const interval = setInterval(() => {
       fetchActiveRides();
       fetchStats();
+      void fetchOpsSummary();
     }, 10000); // Refresh every 10 seconds
+
+    const apiBase = (import.meta.env.VITE_API_BASE || 'http://localhost:5000/api').replace(/\/api$/, '');
+    const token = localStorage.getItem('admin_token') || 'admin';
+    const socket: Socket = ioClient(apiBase, {
+      transports: ['websocket'],
+    });
+    socket.on('connect', () => {
+      socket.emit('identify', { type: 'admin', userId: token });
+    });
+    socket.on('admin_ops_event', (event: OpsEvent) => {
+      setOpsEvents((prev) => [event, ...prev].slice(0, 30));
+      void fetchOpsSummary();
+    });
 
     return () => {
       ridesChannel.unsubscribe();
       clearInterval(interval);
+      socket.disconnect();
     };
   }, []);
+
+  const fetchOpsEvents = async () => {
+    try {
+      const { data } = await api.get('/admin/ops/events', { params: { limit: 30 } });
+      setOpsEvents(Array.isArray(data?.events) ? data.events : []);
+    } catch (error) {
+      console.error('Error fetching ops events:', error);
+    }
+  };
+
+  const fetchOpsSummary = async () => {
+    try {
+      const { data } = await api.get('/admin/ops/summary');
+      setOpsSummary((data?.summary ?? {}) as Record<string, number>);
+    } catch (error) {
+      console.error('Error fetching ops summary:', error);
+    }
+  };
 
   const fetchActiveRides = async () => {
     try {
@@ -220,6 +268,15 @@ export default function OperationsDashboard() {
             <div className="stat-label">Completed Today</div>
           </div>
         </div>
+        <div className="stat-card">
+          <div className="stat-icon completed">
+            <i className="fas fa-bolt"></i>
+          </div>
+          <div className="stat-info">
+            <div className="stat-value">{opsSummary.alert || 0}</div>
+            <div className="stat-label">Alerts (24h)</div>
+          </div>
+        </div>
       </div>
 
       <div className="dashboard-content">
@@ -352,6 +409,43 @@ export default function OperationsDashboard() {
             )}
           </div>
         </div>
+
+        <div className="rides-list">
+          <div className="rides-header">
+            <h3>Live Activity Feed</h3>
+            <span className="rides-count">{opsEvents.length}</span>
+          </div>
+          <div className="rides-scroll">
+            {opsEvents.length === 0 ? (
+              <div className="no-rides">
+                <i className="fas fa-stream"></i>
+                <p>No events yet</p>
+              </div>
+            ) : (
+              opsEvents.map((event) => (
+                <div key={event.id} className="ride-card">
+                  <div className="ride-header">
+                    <span className="ride-id">{event.entity_type}</span>
+                    <span
+                      className="ride-status"
+                      style={{ backgroundColor: event.severity === 'critical' ? '#dc2626' : event.severity === 'warning' ? '#d97706' : '#2563eb' }}
+                    >
+                      {event.severity}
+                    </span>
+                  </div>
+                  <div className="ride-info">
+                    <div className="info-row"><span>{event.title}</span></div>
+                    <div className="info-row"><span>{event.description}</span></div>
+                    <div className="info-row">
+                      <i className="fas fa-clock"></i>
+                      <span>{new Date(event.created_at).toLocaleTimeString()}</span>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
       </div>
 
       <style>{`
@@ -408,7 +502,7 @@ export default function OperationsDashboard() {
         .dashboard-content {
           flex: 1;
           display: grid;
-          grid-template-columns: 1fr 400px;
+          grid-template-columns: 1fr 360px 360px;
           gap: 20px;
           padding: 20px;
           overflow: hidden;
