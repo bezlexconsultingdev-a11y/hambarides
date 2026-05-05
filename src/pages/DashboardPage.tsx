@@ -17,9 +17,10 @@ export default function DashboardPage() {
           setStats(d.stats);
           setError('');
         })
-        .catch(() => {
+        .catch((err: unknown) => {
           if (!mounted) return;
-          setError('Failed to load dashboard');
+          const maybe = err as { response?: { data?: { error?: string } }; message?: string };
+          setError(maybe?.response?.data?.error || maybe?.message || 'Failed to load dashboard');
         })
         .finally(() => {
           if (!mounted) return;

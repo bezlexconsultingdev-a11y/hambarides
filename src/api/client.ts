@@ -1,7 +1,8 @@
 import axios from 'axios';
 import { supabase } from '../lib/supabase';
 
-const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:5000/api';
+const DEFAULT_API_BASE = 'https://hamba-rides-backend.onrender.com/api';
+const API_BASE = (import.meta.env.VITE_API_BASE || DEFAULT_API_BASE).replace(/\/$/, '');
 
 export const api = axios.create({
   baseURL: API_BASE,
