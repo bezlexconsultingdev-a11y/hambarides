@@ -42,6 +42,7 @@ git push -u origin main
    - `VITE_API_BASE` = your backend API base URL, e.g.:
      - Local/testing: `http://localhost:5000/api`
      - Production: `https://your-backend.onrender.com/api` (or whatever URL your backend uses)
+   - `VITE_ADMIN_NOTIFICATIONS_API_KEY` (optional): set to the same secret as `ADMIN_NOTIFICATIONS_API_KEY` on the backend if you want the Push Notifications page to authorize via API key (in addition to an admin Supabase session).
 7. Click **Deploy**.
 
 ## 3. After deploy

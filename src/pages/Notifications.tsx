@@ -1,10 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Bell, Send, History, AlertCircle, CheckCircle } from 'lucide-react';
 import axios from 'axios';
-import { supabase } from '../lib/supabase';
-
-const API_URL = import.meta.env.VITE_API_URL || 'https://hamba-rides-backend.onrender.com/api';
-const ADMIN_NOTIFICATIONS_API_KEY = import.meta.env.VITE_ADMIN_NOTIFICATIONS_API_KEY || '';
+import { api } from '../api/client';
 
 interface NotificationHistory {
   id: string;
@@ -24,6 +21,7 @@ export default function Notifications() {
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
   const [history, setHistory] = useState<NotificationHistory[]>([]);
+  const [historyError, setHistoryError] = useState('');
 
   useEffect(() => {
     if (tab === 'history') {
@@ -31,25 +29,18 @@ export default function Notifications() {
     }
   }, [tab]);
 
-  const getRequestHeaders = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    const headers: Record<string, string> = {};
-    if (session?.access_token) {
-      headers.Authorization = `Bearer ${session.access_token}`;
-    }
-    if (ADMIN_NOTIFICATIONS_API_KEY) {
-      headers['x-admin-api-key'] = ADMIN_NOTIFICATIONS_API_KEY;
-    }
-    return headers;
-  };
-
   const fetchHistory = async () => {
+    setHistoryError('');
     try {
-      const headers = await getRequestHeaders();
-      const response = await axios.get(`${API_URL}/notifications/history`, { headers });
-      setHistory(response.data.history);
+      const response = await api.get('/notifications/history');
+      setHistory(response.data.history ?? []);
     } catch (err) {
       console.error('Error fetching history:', err);
+      const msg = axios.isAxiosError(err)
+        ? err.response?.data?.message || err.response?.data?.error || err.message
+        : 'Failed to load history';
+      setHistoryError(String(msg));
+      setHistory([]);
     }
   };
 
@@ -64,14 +55,13 @@ export default function Notifications() {
     setSuccess('');
 
     try {
-      const headers = await getRequestHeaders();
       const idempotencyKey = `admin-${userType}-${Date.now()}-${title.trim().slice(0, 24)}`;
-      const response = await axios.post(`${API_URL}/notifications/broadcast`, {
+      const response = await api.post('/notifications/broadcast', {
         userType,
         title,
         body,
         idempotencyKey,
-      }, { headers });
+      });
 
       setSuccess(`Notification sent to ${response.data.sentCount} ${userType}s successfully!`);
       setTitle('');
@@ -81,10 +71,10 @@ export default function Notifications() {
         fetchHistory();
       }
     } catch (err: unknown) {
-      const errorMessage = axios.isAxiosError(err) 
-        ? err.response?.data?.message || 'Failed to send notification'
+      const errorMessage = axios.isAxiosError(err)
+        ? err.response?.data?.message || err.response?.data?.error || err.message || 'Failed to send notification'
         : 'Failed to send notification';
-      setError(errorMessage);
+      setError(String(errorMessage));
     } finally {
       setLoading(false);
     }
@@ -239,6 +229,14 @@ export default function Notifications() {
         <div className="bg-white rounded-lg shadow">
           <div className="p-6">
             <h2 className="text-xl font-semibold mb-4">Notification History</h2>
+            {historyError && (
+              <div className="mb-4 p-4 bg-amber-50 border border-amber-200 rounded-lg text-amber-900 text-sm">
+                {historyError}. Ensure <code className="bg-amber-100 px-1 rounded">VITE_API_BASE</code> points to your
+                Hamba API (same as the rest of the admin), you are logged in as an admin user, or set{' '}
+                <code className="bg-amber-100 px-1 rounded">VITE_ADMIN_NOTIFICATIONS_API_KEY</code> to match{' '}
+                <code className="bg-amber-100 px-1 rounded">ADMIN_NOTIFICATIONS_API_KEY</code> on the server.
+              </div>
+            )}
 
             <div className="overflow-x-auto">
               <table className="w-full">

@@ -37,17 +37,35 @@ export default function ApplicationsPage() {
 
   const handleApprove = (id: number) => {
     approveApplication(id)
-      .then(loadApplications)
-      .catch(console.error);
+      .then((res) => {
+        if (res.emailSent === false) {
+          window.alert(
+            `Application approved, but the email was not sent (${res.emailError || 'check RESEND_API_KEY and FROM_EMAIL on the server'}). Tell the driver they can log in to the driver app.`
+          );
+        }
+        loadApplications();
+      })
+      .catch((err) => {
+        console.error(err);
+        const msg = err?.response?.data?.error || err?.message || 'Approve failed';
+        window.alert(String(msg));
+      });
   };
 
   const handleDecline = (id: number, reason?: string) => {
     declineApplication(id, reason)
-      .then(() => {
+      .then((res) => {
+        if (res.emailSent === false && res.emailError) {
+          window.alert(`Declined, but email was not sent (${res.emailError}).`);
+        }
         setDeclineReason(null);
         loadApplications();
       })
-      .catch(console.error);
+      .catch((err) => {
+        console.error(err);
+        const msg = err?.response?.data?.error || err?.message || 'Decline failed';
+        window.alert(String(msg));
+      });
   };
 
   if (loading) return <div className={styles.loading}>Loading...</div>;
