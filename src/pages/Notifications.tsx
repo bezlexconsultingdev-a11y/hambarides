@@ -45,7 +45,9 @@ export default function Notifications() {
   };
 
   const handleSendNotification = async () => {
-    if (!title || !body) {
+    const cleanTitle = title.trim();
+    const cleanBody = body.trim();
+    if (!cleanTitle || !cleanBody) {
       setError('Please fill in all fields');
       return;
     }
@@ -58,18 +60,35 @@ export default function Notifications() {
       const idempotencyKey = `admin-${userType}-${Date.now()}-${title.trim().slice(0, 24)}`;
       const response = await api.post('/notifications/broadcast', {
         userType,
-        title,
-        body,
+        title: cleanTitle,
+        body: cleanBody,
         idempotencyKey,
       });
+      const sentCount =
+        response.data?.sentCount ??
+        response.data?.sent_count ??
+        response.data?.count ??
+        0;
+      const failedCount = response.data?.failedCount ?? response.data?.failed_count ?? 0;
+      const invalidatedCount = response.data?.invalidatedCount ?? response.data?.invalidated_count ?? 0;
+      const duplicate = Boolean(response.data?.duplicate);
+      const serverMessage = String(response.data?.message || '').trim();
 
-      setSuccess(`Notification sent to ${response.data.sentCount} ${userType}s successfully!`);
+      if (duplicate) {
+        setSuccess(
+          serverMessage ||
+            `This notification was already sent earlier (idempotency). Last count: ${sentCount} ${userType}s.`
+        );
+      } else {
+        setSuccess(
+          serverMessage ||
+            `Notification request completed. Sent: ${sentCount}, Failed: ${failedCount}, Invalid tokens removed: ${invalidatedCount}.`
+        );
+      }
       setTitle('');
       setBody('');
-      
-      if (tab === 'history') {
-        fetchHistory();
-      }
+      // Refresh history immediately so admin sees the new broadcast row.
+      void fetchHistory();
     } catch (err: unknown) {
       const errorMessage = axios.isAxiosError(err)
         ? err.response?.data?.message || err.response?.data?.error || err.message || 'Failed to send notification'
@@ -203,6 +222,7 @@ export default function Notifications() {
 
               {/* Send Button */}
               <button
+                type="button"
                 onClick={handleSendNotification}
                 disabled={loading}
                 className="w-full bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 font-medium"

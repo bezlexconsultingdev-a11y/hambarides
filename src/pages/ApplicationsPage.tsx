@@ -16,14 +16,20 @@ function DocLink({ href, label }: { href: string; label: string }) {
 export default function ApplicationsPage() {
   const [applications, setApplications] = useState<DriverApplicationRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [declineReason, setDeclineReason] = useState<{ id: number; value: string } | null>(null);
   const [expandedId, setExpandedId] = useState<number | null>(null);
 
   const loadApplications = useCallback(() => {
     setLoading(true);
+    setError('');
     getPendingApplications({ limit: 100 })
       .then((a) => setApplications(a.applications))
-      .catch(() => setApplications([]))
+      .catch((err) => {
+        const msg = err?.response?.data?.error || err?.message || 'Failed to load applications';
+        setError(String(msg));
+        setApplications([]);
+      })
       .finally(() => setLoading(false));
   }, []);
 
@@ -76,6 +82,7 @@ export default function ApplicationsPage() {
       <p className={styles.muted}>
         Pending applications only. <Link to="/drivers">View all drivers</Link>.
       </p>
+      {error ? <p className={styles.muted} style={{ color: '#b91c1c' }}>{error}</p> : null}
       {applications.length === 0 ? (
         <p className={styles.muted}>No pending applications.</p>
       ) : (
