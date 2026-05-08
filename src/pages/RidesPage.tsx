@@ -1,8 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
-import { approveInstantEftRide, getPendingInstantEftRides, getRides, rejectInstantEftRide } from '../api/admin';
+import { getRides } from '../api/admin';
 import type { RideRow } from '../api/admin';
 import styles from './TablePage.module.css';
-import axios from 'axios';
 
 const PLATFORM_SHARE = 0.21;
 
@@ -40,10 +39,6 @@ export default function RidesPage() {
   const [rideTypeFilter, setRideTypeFilter] = useState<string>('');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
-  const [pendingEft, setPendingEft] = useState<RideRow[]>([]);
-  const [processingRideId, setProcessingRideId] = useState<string>('');
-  const [actionError, setActionError] = useState('');
-  const [pendingEftError, setPendingEftError] = useState('');
 
   useEffect(() => {
     getRides({ limit: 500, status: statusFilter || undefined })
@@ -51,66 +46,6 @@ export default function RidesPage() {
       .catch(() => setRides([]))
       .finally(() => setLoading(false));
   }, [statusFilter]);
-
-  const refreshPendingEft = async () => {
-    setPendingEftError('');
-    try {
-      const data = await getPendingInstantEftRides({ limit: 200 });
-      setPendingEft(data.rides);
-    } catch (error) {
-      const message = axios.isAxiosError(error)
-        ? String(error.response?.data?.error || error.response?.data?.message || error.message)
-        : 'Failed to load pending Instant EFT approvals';
-      setPendingEftError(message);
-      setPendingEft([]);
-    }
-  };
-
-  useEffect(() => {
-    void refreshPendingEft();
-  }, []);
-
-  const handleApproveEft = async (rideId: number | string) => {
-    const key = String(rideId);
-    setProcessingRideId(key);
-    setActionError('');
-    try {
-      await approveInstantEftRide(rideId);
-      await Promise.all([
-        refreshPendingEft(),
-        getRides({ limit: 500, status: statusFilter || undefined }).then((d) => setRides(d.rides)),
-      ]);
-    } catch (error) {
-      const message = axios.isAxiosError(error)
-        ? String(error.response?.data?.error || error.response?.data?.message || error.message)
-        : 'Unknown error';
-      setActionError(`Failed to approve Instant EFT for ride #${key}: ${message}`);
-    } finally {
-      setProcessingRideId('');
-    }
-  };
-
-  const handleRejectEft = async (rideId: number | string) => {
-    const key = String(rideId);
-    const reason = window.prompt('Reason for rejection', 'Instant EFT payment not verified');
-    if (reason == null) return;
-    setProcessingRideId(key);
-    setActionError('');
-    try {
-      await rejectInstantEftRide(rideId, reason);
-      await Promise.all([
-        refreshPendingEft(),
-        getRides({ limit: 500, status: statusFilter || undefined }).then((d) => setRides(d.rides)),
-      ]);
-    } catch (error) {
-      const message = axios.isAxiosError(error)
-        ? String(error.response?.data?.error || error.response?.data?.message || error.message)
-        : 'Unknown error';
-      setActionError(`Failed to reject Instant EFT for ride #${key}: ${message}`);
-    } finally {
-      setProcessingRideId('');
-    }
-  };
 
   const filteredRides = useMemo(() => {
     let list = rides;
@@ -139,63 +74,6 @@ export default function RidesPage() {
   return (
     <div>
       <h1 className={styles.title}>Rides</h1>
-      <h2 className={styles.subtitle}>Instant EFT Approval Queue</h2>
-      {actionError ? <p className={styles.muted}>{actionError}</p> : null}
-      {pendingEftError ? <p className={styles.muted}>Queue error: {pendingEftError}</p> : null}
-      <div className={styles.tableWrap}>
-        <table className={styles.table}>
-          <thead>
-            <tr>
-              <th>Ride ID</th>
-              <th>Rider</th>
-              <th>Reference</th>
-              <th>Fare (R)</th>
-              <th>Requested</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {pendingEft.length === 0 ? (
-              <tr>
-                <td colSpan={6}>No pending Instant EFT approvals.</td>
-              </tr>
-            ) : (
-              pendingEft.map((r) => {
-                const rideId = String(r.id);
-                const busy = processingRideId === rideId;
-                const riderName = `${r.rider_first_name ?? ''} ${r.rider_last_name ?? ''}`.trim() || String(r.rider_id);
-                return (
-                  <tr key={`eft-${rideId}`}>
-                    <td>{rideId}</td>
-                    <td>{riderName}</td>
-                    <td>{r.payment_reference || '—'}</td>
-                    <td>{r.fare_amount != null ? Number(r.fare_amount).toFixed(2) : '—'}</td>
-                    <td>{new Date(r.requested_at).toLocaleString()}</td>
-                    <td>
-                      <button
-                        type="button"
-                        onClick={() => handleApproveEft(r.id)}
-                        className={styles.btnPrimary}
-                        disabled={busy}
-                      >
-                        {busy ? 'Processing...' : 'Approve'}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleRejectEft(r.id)}
-                        className={styles.btnDanger}
-                        disabled={busy}
-                      >
-                        Reject
-                      </button>
-                    </td>
-                  </tr>
-                );
-              })
-            )}
-          </tbody>
-        </table>
-      </div>
       <div className={styles.toolbar}>
         <select
           value={statusFilter}
