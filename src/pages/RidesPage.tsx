@@ -80,8 +80,11 @@ export default function RidesPage() {
         refreshPendingEft(),
         getRides({ limit: 500, status: statusFilter || undefined }).then((d) => setRides(d.rides)),
       ]);
-    } catch {
-      setActionError(`Failed to approve Instant EFT for ride #${key}`);
+    } catch (error) {
+      const message = axios.isAxiosError(error)
+        ? String(error.response?.data?.error || error.response?.data?.message || error.message)
+        : 'Unknown error';
+      setActionError(`Failed to approve Instant EFT for ride #${key}: ${message}`);
     } finally {
       setProcessingRideId('');
     }
@@ -99,8 +102,11 @@ export default function RidesPage() {
         refreshPendingEft(),
         getRides({ limit: 500, status: statusFilter || undefined }).then((d) => setRides(d.rides)),
       ]);
-    } catch {
-      setActionError(`Failed to reject Instant EFT for ride #${key}`);
+    } catch (error) {
+      const message = axios.isAxiosError(error)
+        ? String(error.response?.data?.error || error.response?.data?.message || error.message)
+        : 'Unknown error';
+      setActionError(`Failed to reject Instant EFT for ride #${key}: ${message}`);
     } finally {
       setProcessingRideId('');
     }
