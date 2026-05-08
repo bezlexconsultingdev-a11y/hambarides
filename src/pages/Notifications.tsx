@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Bell, Send, History, AlertCircle, CheckCircle } from 'lucide-react';
 import axios from 'axios';
 import { api } from '../api/client';
+import { getUsers } from '../api/admin';
 
 interface NotificationHistory {
   id: string;
@@ -14,7 +15,9 @@ interface NotificationHistory {
 
 export default function Notifications() {
   const [tab, setTab] = useState<'send' | 'history'>('send');
-  const [userType, setUserType] = useState<'rider' | 'driver'>('rider');
+  const [targetMode, setTargetMode] = useState<'broadcast' | 'single'>('broadcast');
+  const [userType, setUserType] = useState<'rider' | 'driver' | 'all'>('rider');
+  const [targetUserId, setTargetUserId] = useState('');
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
   const [loading, setLoading] = useState(false);
@@ -22,12 +25,63 @@ export default function Notifications() {
   const [error, setError] = useState('');
   const [history, setHistory] = useState<NotificationHistory[]>([]);
   const [historyError, setHistoryError] = useState('');
+  const [users, setUsers] = useState<Array<{ id: string; label: string }>>([]);
+  const [usersLoading, setUsersLoading] = useState(false);
+  const [userSearch, setUserSearch] = useState('');
 
   useEffect(() => {
     if (tab === 'history') {
       fetchHistory();
     }
   }, [tab]);
+
+  useEffect(() => {
+    if (tab !== 'send' || targetMode !== 'single' || users.length > 0 || usersLoading) return;
+    const loadUsers = async () => {
+      setUsersLoading(true);
+      try {
+        const response = await getUsers({ limit: 500, offset: 0 });
+        const mapped = (response.users ?? []).map((u) => {
+          const firstName = String(u.first_name ?? '').trim();
+          const lastName = String(u.last_name ?? '').trim();
+          const fullName = `${firstName} ${lastName}`.trim() || 'Unknown user';
+          const email = String(u.email ?? '').trim();
+          const phone = String(u.phone ?? '').trim();
+          const details = [email, phone].filter(Boolean).join(' | ');
+          return {
+            id: String(u.id),
+            label: `${fullName}${details ? ` (${details})` : ''}`,
+          };
+        });
+        setUsers(mapped);
+      } catch (err) {
+        console.error('Failed to load users for notification picker:', err);
+      } finally {
+        setUsersLoading(false);
+      }
+    };
+    void loadUsers();
+  }, [tab, targetMode, users.length, usersLoading]);
+
+  useEffect(() => {
+    if (targetMode !== 'single') return;
+    const raw = userSearch.trim();
+    if (!raw) {
+      setTargetUserId('');
+      return;
+    }
+    const exact = users.find((u) => u.id === raw || u.label === raw);
+    if (exact) {
+      setTargetUserId(exact.id);
+      return;
+    }
+    const match = raw.match(/^(\d+)\s*[-:|]/);
+    if (match?.[1]) {
+      setTargetUserId(match[1]);
+    } else {
+      setTargetUserId(raw);
+    }
+  }, [targetMode, userSearch, users]);
 
   const fetchHistory = async () => {
     setHistoryError('');
@@ -57,13 +111,30 @@ export default function Notifications() {
     setSuccess('');
 
     try {
-      const idempotencyKey = `admin-${userType}-${Date.now()}-${title.trim().slice(0, 24)}`;
-      const response = await api.post('/notifications/broadcast', {
-        userType,
-        title: cleanTitle,
-        body: cleanBody,
-        idempotencyKey,
-      });
+      let response;
+      if (targetMode === 'single') {
+        const cleanUserId = targetUserId.trim();
+        if (!cleanUserId) {
+          setLoading(false);
+          setError('Please enter a user ID');
+          return;
+        }
+        const idempotencyKey = `admin-single-${cleanUserId}-${Date.now()}-${title.trim().slice(0, 24)}`;
+        response = await api.post('/notifications/send', {
+          userId: cleanUserId,
+          title: cleanTitle,
+          body: cleanBody,
+          idempotencyKey,
+        });
+      } else {
+        const idempotencyKey = `admin-${userType}-${Date.now()}-${title.trim().slice(0, 24)}`;
+        response = await api.post('/notifications/broadcast', {
+          userType,
+          title: cleanTitle,
+          body: cleanBody,
+          idempotencyKey,
+        });
+      }
       const sentCount =
         response.data?.sentCount ??
         response.data?.sent_count ??
@@ -73,11 +144,12 @@ export default function Notifications() {
       const invalidatedCount = response.data?.invalidatedCount ?? response.data?.invalidated_count ?? 0;
       const duplicate = Boolean(response.data?.duplicate);
       const serverMessage = String(response.data?.message || '').trim();
+      const audienceLabel = targetMode === 'single' ? `user ${targetUserId.trim()}` : userType;
 
       if (duplicate) {
         setSuccess(
           serverMessage ||
-            `This notification was already sent earlier (idempotency). Last count: ${sentCount} ${userType}s.`
+            `This notification was already sent earlier (idempotency). Last count: ${sentCount} for ${audienceLabel}.`
         );
       } else {
         setSuccess(
@@ -87,6 +159,8 @@ export default function Notifications() {
       }
       setTitle('');
       setBody('');
+      setTargetUserId('');
+      setUserSearch('');
       // Refresh history immediately so admin sees the new broadcast row.
       void fetchHistory();
     } catch (err: unknown) {
@@ -180,16 +254,52 @@ export default function Notifications() {
               {/* Target Audience */}
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Target Audience
+                  Send Mode
                 </label>
                 <select
-                  value={userType}
-                  onChange={(e) => setUserType(e.target.value as 'rider' | 'driver')}
+                  value={targetMode}
+                  onChange={(e) => setTargetMode(e.target.value as 'broadcast' | 'single')}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                 >
-                  <option value="rider">All Riders</option>
-                  <option value="driver">All Drivers</option>
+                  <option value="broadcast">Broadcast</option>
+                  <option value="single">Single User</option>
                 </select>
+              </div>
+
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  {targetMode === 'single' ? 'Target User ID' : 'Target Audience'}
+                </label>
+                {targetMode === 'single' ? (
+                  <div className="space-y-2">
+                    <input
+                      type="text"
+                      value={userSearch}
+                      onChange={(e) => setUserSearch(e.target.value)}
+                      placeholder={usersLoading ? 'Loading users...' : 'Search by name, email, phone, or enter user ID'}
+                      list="notification-user-options"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    />
+                    <datalist id="notification-user-options">
+                      {users.map((u) => (
+                        <option key={u.id} value={u.label} />
+                      ))}
+                    </datalist>
+                    <div className="text-xs text-gray-500">
+                      Selected user ID: <span className="font-medium">{targetUserId || 'None'}</span>
+                    </div>
+                  </div>
+                ) : (
+                  <select
+                    value={userType}
+                    onChange={(e) => setUserType(e.target.value as 'rider' | 'driver' | 'all')}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  >
+                    <option value="rider">All Riders</option>
+                    <option value="driver">All Drivers</option>
+                    <option value="all">All Riders + Drivers</option>
+                  </select>
+                )}
               </div>
 
               {/* Title */}
