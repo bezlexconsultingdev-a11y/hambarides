@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { approveInstantEftRide, getPendingInstantEftRides, getRides, rejectInstantEftRide } from '../api/admin';
 import type { RideRow } from '../api/admin';
 import styles from './TablePage.module.css';
+import axios from 'axios';
 
 const PLATFORM_SHARE = 0.21;
 
@@ -42,6 +43,7 @@ export default function RidesPage() {
   const [pendingEft, setPendingEft] = useState<RideRow[]>([]);
   const [processingRideId, setProcessingRideId] = useState<string>('');
   const [actionError, setActionError] = useState('');
+  const [pendingEftError, setPendingEftError] = useState('');
 
   useEffect(() => {
     getRides({ limit: 500, status: statusFilter || undefined })
@@ -51,10 +53,15 @@ export default function RidesPage() {
   }, [statusFilter]);
 
   const refreshPendingEft = async () => {
+    setPendingEftError('');
     try {
       const data = await getPendingInstantEftRides({ limit: 200 });
       setPendingEft(data.rides);
-    } catch {
+    } catch (error) {
+      const message = axios.isAxiosError(error)
+        ? String(error.response?.data?.error || error.response?.data?.message || error.message)
+        : 'Failed to load pending Instant EFT approvals';
+      setPendingEftError(message);
       setPendingEft([]);
     }
   };
@@ -128,6 +135,7 @@ export default function RidesPage() {
       <h1 className={styles.title}>Rides</h1>
       <h2 className={styles.subtitle}>Instant EFT Approval Queue</h2>
       {actionError ? <p className={styles.muted}>{actionError}</p> : null}
+      {pendingEftError ? <p className={styles.muted}>Queue error: {pendingEftError}</p> : null}
       <div className={styles.tableWrap}>
         <table className={styles.table}>
           <thead>
