@@ -168,6 +168,13 @@ export interface RideRow {
   distance_km: number | null;
   requested_at: string;
   completed_at: string | null;
+  payment_method?: string | null;
+  payment_status?: string | null;
+  payment_reference?: string | null;
+  rider_first_name?: string | null;
+  rider_last_name?: string | null;
+  rider_phone?: string | null;
+  rider_email?: string | null;
 }
 
 export async function getRides(params?: { limit?: number; offset?: number; status?: string }): Promise<{ rides: RideRow[] }> {
@@ -179,6 +186,21 @@ export async function getRides(params?: { limit?: number; offset?: number; statu
   if (params?.status) search.set('status', params.status);
   const { data } = await api.get(`/admin/rides?${search.toString()}`);
   return { rides: (data?.rides ?? []) as RideRow[] };
+}
+
+export async function getPendingInstantEftRides(params?: { limit?: number }): Promise<{ rides: RideRow[] }> {
+  const { data } = await api.get('/admin/payments/instant-eft/pending', {
+    params: { limit: params?.limit ?? 200 },
+  });
+  return { rides: (data?.rides ?? []) as RideRow[] };
+}
+
+export async function approveInstantEftRide(rideId: number | string): Promise<void> {
+  await api.post(`/admin/payments/instant-eft/${encodeURIComponent(String(rideId))}/approve`);
+}
+
+export async function rejectInstantEftRide(rideId: number | string, reason: string): Promise<void> {
+  await api.post(`/admin/payments/instant-eft/${encodeURIComponent(String(rideId))}/reject`, { reason });
 }
 
 export interface PayoutDriverRow {
