@@ -34,7 +34,8 @@ export default function PayoutsPage() {
     <div>
       <h1 className={styles.title}>Payouts</h1>
       <p className={styles.muted}>
-        Driver earnings (79%) and platform share (21%). Amount drivers owe from cash rides is deducted from future card payouts.
+        EFT-settled trips only (e.g. Instant EFT). Card and cash are excluded. Driver share 79% / platform 21% on
+        eligible fares. Amount drivers owe from cash rides is deducted from future card payouts.
       </p>
 
       <div className={styles.payoutSummary}>

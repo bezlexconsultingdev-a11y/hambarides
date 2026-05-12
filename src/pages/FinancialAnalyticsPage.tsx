@@ -31,16 +31,28 @@ export default function FinancialAnalyticsPage() {
     try {
       setLoading(true);
       const response = await api.get(`/admin/analytics/revenue?period=${period}`);
-      const data = response.data.analytics;
+      const raw = response.data?.analytics ?? response.data?.series ?? [];
+      const data: RevenueData[] = Array.isArray(raw)
+        ? raw.map((item: Record<string, unknown>) => ({
+            date: String(item.date ?? ''),
+            rides: Number(item.rides ?? 0) || 0,
+            revenue: Number(item.revenue ?? 0) || 0,
+            commission: Number(item.commission ?? 0) || 0,
+            driver_earnings: Number(item.driver_earnings ?? 0) || 0,
+          }))
+        : [];
       setAnalytics(data);
 
       // Calculate totals
-      const totals = data.reduce((acc: any, item: RevenueData) => ({
-        revenue: acc.revenue + item.revenue,
-        commission: acc.commission + item.commission,
-        driverEarnings: acc.driverEarnings + item.driver_earnings,
-        rides: acc.rides + item.rides
-      }), { revenue: 0, commission: 0, driverEarnings: 0, rides: 0 });
+      const totals = data.reduce(
+        (acc: { revenue: number; commission: number; driverEarnings: number; rides: number }, item: RevenueData) => ({
+          revenue: acc.revenue + item.revenue,
+          commission: acc.commission + item.commission,
+          driverEarnings: acc.driverEarnings + item.driver_earnings,
+          rides: acc.rides + item.rides,
+        }),
+        { revenue: 0, commission: 0, driverEarnings: 0, rides: 0 }
+      );
 
       setStats({
         totalRevenue: totals.revenue,
@@ -161,7 +173,7 @@ export default function FinancialAnalyticsPage() {
           ) : (
             <div className={styles.barChart}>
               {analytics.map((item, index) => {
-                const maxRevenue = Math.max(...analytics.map(a => a.revenue));
+                const maxRevenue = Math.max(0, ...analytics.map((a) => a.revenue));
                 const height = maxRevenue > 0 ? (item.revenue / maxRevenue) * 100 : 0;
                 
                 return (

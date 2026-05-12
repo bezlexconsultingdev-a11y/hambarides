@@ -66,7 +66,7 @@ const menuItems: MenuItem[] = [
     icon: <DollarSign className="w-5 h-5" />,
     children: [
       { id: 'payouts', label: 'Payouts', icon: <CreditCard className="w-4 h-4" />, path: '/payouts' },
-      { id: 'analytics', label: 'Analytics', icon: <BarChart3 className="w-4 h-4" />, path: '/financial-analytics' },
+      { id: 'analytics', label: 'Analytics', icon: <BarChart3 className="w-4 h-4" />, path: '/analytics' },
       { id: 'receipts', label: 'Receipts', icon: <Receipt className="w-4 h-4" />, path: '/receipts' },
     ],
   },

@@ -30,9 +30,11 @@ export default function DriverPerformancePage() {
     try {
       setLoading(true);
       const response = await api.get(`/admin/analytics/driver-performance?sort=${sortBy}&filter=${filterStatus}`);
-      setDrivers(response.data.drivers);
+      const list = response.data?.drivers;
+      setDrivers(Array.isArray(list) ? list : []);
     } catch (error) {
       console.error('Failed to load driver performance:', error);
+      setDrivers([]);
     } finally {
       setLoading(false);
     }

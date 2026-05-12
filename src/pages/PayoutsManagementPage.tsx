@@ -144,7 +144,9 @@ export default function PayoutsManagementPage() {
     <div className={styles.container}>
       <div className={styles.header}>
         <h1>Driver Payouts</h1>
-        <p className={styles.subtitle}>Manage driver earnings and process payouts</p>
+        <p className={styles.subtitle}>
+          Manage driver EFT earnings and process payouts (Instant EFT / EFT trips only; card and cash excluded).
+        </p>
       </div>
 
       <div className={styles.stats}>

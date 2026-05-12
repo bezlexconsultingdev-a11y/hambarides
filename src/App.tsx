@@ -53,6 +53,7 @@ function AppRoutes() {
         <Route path="payouts" element={<PayoutsPage />} />
         <Route path="payouts-management" element={<PayoutsManagementPage />} />
         <Route path="analytics" element={<FinancialAnalyticsPage />} />
+        <Route path="financial-analytics" element={<Navigate to="/analytics" replace />} />
         <Route path="support" element={<SupportTicketsPage />} />
         <Route path="system-config" element={<SystemConfigPage />} />
         <Route path="/disputes" element={<ProtectedRoute><DisputesPage /></ProtectedRoute>} />

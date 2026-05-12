@@ -117,7 +117,7 @@ export default function DashboardPageNew() {
           icon={<DollarSign className="w-6 h-6" />}
           gradient="from-green-500 to-green-600"
           sparklineData={sparklineData}
-          onClick={() => navigate('/financial-analytics')}
+          onClick={() => navigate('/analytics')}
         />
         <StatCard
           title="Total Rides"
