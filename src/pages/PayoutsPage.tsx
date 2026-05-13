@@ -34,8 +34,8 @@ export default function PayoutsPage() {
     <div>
       <h1 className={styles.title}>Payouts</h1>
       <p className={styles.muted}>
-        EFT-settled trips only (e.g. Instant EFT). Card and cash are excluded. Driver share 79% / platform 21% on
-        eligible fares. Amount drivers owe from cash rides is deducted from future card payouts.
+        Card and Instant EFT (non-cash) completed trips. Cash / COD is excluded from these balances. Driver share 79% /
+        platform 21% on eligible fares. Amount drivers owe from cash rides is deducted from future card payouts.
       </p>
 
       <div className={styles.payoutSummary}>
