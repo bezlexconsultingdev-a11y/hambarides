@@ -153,7 +153,7 @@ export default function PayoutsManagementPage() {
       <div className={styles.header}>
         <h1>Driver Payouts</h1>
         <p className={styles.subtitle}>
-          Manage driver earnings and payouts (card and Instant EFT; cash excluded from balances).
+          Same rules as the driver payout screen: platform-collected earnings only; cash/COD excluded.
         </p>
       </div>
 

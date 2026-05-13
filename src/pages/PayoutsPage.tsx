@@ -49,8 +49,9 @@ export default function PayoutsPage() {
         </p>
       )}
       <p className={styles.muted}>
-        Card and Instant EFT (non-cash) completed trips. Cash / COD is excluded from these balances. Driver share 79% /
-        platform 21% on eligible fares. Amount drivers owe from cash rides is deducted from future card payouts.
+        Matches the driver app &quot;available&quot; payout total: cash and COD are excluded (driver already collected
+        that fare). Instant EFT, card, and other platform-collected trips count toward bank payout using the 79% / 21%
+        split on eligible fare.
       </p>
 
       <div className={styles.payoutSummary}>
