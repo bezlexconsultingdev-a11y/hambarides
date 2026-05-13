@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { isAxiosError } from 'axios';
 import { api } from '../api/client';
 import styles from './FinancialAnalyticsPage.module.css';
 
@@ -14,6 +15,7 @@ export default function FinancialAnalyticsPage() {
   const [period, setPeriod] = useState<'week' | 'month' | 'year'>('week');
   const [analytics, setAnalytics] = useState<RevenueData[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [stats, setStats] = useState({
     totalRevenue: 0,
     totalCommission: 0,
@@ -30,6 +32,7 @@ export default function FinancialAnalyticsPage() {
   const loadAnalytics = async () => {
     try {
       setLoading(true);
+      setLoadError(null);
       const response = await api.get(`/admin/analytics/revenue?period=${period}`);
       const raw = response.data?.analytics ?? response.data?.series ?? [];
       const data: RevenueData[] = Array.isArray(raw)
@@ -64,6 +67,24 @@ export default function FinancialAnalyticsPage() {
       });
     } catch (error) {
       console.error('Failed to load analytics:', error);
+      const msg = isAxiosError(error)
+        ? String(
+            error.response?.data?.error ||
+              error.response?.data?.message ||
+              error.message ||
+              'Request failed'
+          )
+        : 'Could not load analytics';
+      setLoadError(msg);
+      setAnalytics([]);
+      setStats({
+        totalRevenue: 0,
+        totalCommission: 0,
+        totalDriverEarnings: 0,
+        totalRides: 0,
+        averageRideValue: 0,
+        commissionRate: 0,
+      });
     } finally {
       setLoading(false);
     }
@@ -142,6 +163,15 @@ export default function FinancialAnalyticsPage() {
         </div>
       </div>
 
+      {loadError && (
+        <p className={styles.apiError} role="alert">
+          Could not load analytics: {loadError}. Confirm the API is deployed and{' '}
+          <code>SUPABASE_SERVICE_KEY</code> is set on the server. Open your backend root{' '}
+          <code>/health</code> (remove <code>/api</code> from the base URL) — <code>supabaseClient</code> should read{' '}
+          <code>service_role</code>.
+        </p>
+      )}
+
       <div className={styles.statsGrid}>
         <div className={styles.statCard}>
           <div className={styles.statLabel}>Total Revenue</div>
@@ -168,7 +198,9 @@ export default function FinancialAnalyticsPage() {
       <div className={styles.chartContainer}>
         <h2>Revenue Trend</h2>
         <div className={styles.chart}>
-          {analytics.length === 0 ? (
+          {loadError ? (
+            <div className={styles.emptyChart}>Fix the error above, then refresh.</div>
+          ) : analytics.length === 0 ? (
             <div className={styles.emptyChart}>No data available for this period</div>
           ) : (
             <div className={styles.barChart}>

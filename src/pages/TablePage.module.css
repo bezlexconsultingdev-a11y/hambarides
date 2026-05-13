@@ -231,3 +231,13 @@
   font-weight: 800;
   color: #007749;
 }
+
+.apiError {
+  margin: 0 0 1rem 0;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  background: #fff3cd;
+  border: 1px solid #ffc107;
+  color: #856404;
+  font-size: 0.95rem;
+}

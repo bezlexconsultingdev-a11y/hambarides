@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { isAxiosError } from 'axios';
 import { api } from '../api/client';
 import styles from './DriverPerformancePage.module.css';
 
@@ -19,6 +20,7 @@ interface DriverPerformance {
 export default function DriverPerformancePage() {
   const [loading, setLoading] = useState(true);
   const [drivers, setDrivers] = useState<DriverPerformance[]>([]);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<'rating' | 'rides' | 'earnings' | 'performance'>('performance');
   const [filterStatus, setFilterStatus] = useState<'all' | 'top' | 'low'>('all');
 
@@ -29,12 +31,17 @@ export default function DriverPerformancePage() {
   const loadPerformance = async () => {
     try {
       setLoading(true);
+      setLoadError(null);
       const response = await api.get(`/admin/analytics/driver-performance?sort=${sortBy}&filter=${filterStatus}`);
       const list = response.data?.drivers;
       setDrivers(Array.isArray(list) ? list : []);
     } catch (error) {
       console.error('Failed to load driver performance:', error);
       setDrivers([]);
+      const msg = isAxiosError(error)
+        ? String(error.response?.data?.error || error.response?.data?.message || error.message || 'Request failed')
+        : 'Could not load driver performance';
+      setLoadError(msg);
     } finally {
       setLoading(false);
     }
@@ -73,6 +80,13 @@ export default function DriverPerformancePage() {
           </select>
         </div>
       </div>
+
+      {loadError && (
+        <p className={styles.apiError} role="alert">
+          Could not load driver performance: {loadError}. Set <code>SUPABASE_SERVICE_KEY</code> on the API server if
+          lists are empty; check <code>/health</code> for <code>supabaseClient: service_role</code>.
+        </p>
+      )}
 
       <div className={styles.statsGrid}>
         <div className={styles.statCard}>
@@ -156,7 +170,7 @@ export default function DriverPerformancePage() {
         </table>
       </div>
 
-      {drivers.length === 0 && (
+      {drivers.length === 0 && !loadError && (
         <div className={styles.empty}>
           <p>No drivers found</p>
         </div>

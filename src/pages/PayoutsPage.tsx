@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { isAxiosError } from 'axios';
 import { getPayouts } from '../api/admin';
 import type { PayoutDriverRow } from '../api/admin';
 import styles from './TablePage.module.css';
@@ -10,8 +11,10 @@ export default function PayoutsPage() {
 
   const [commissionOwed, setCommissionOwed] = useState<number | null>(null);
   const [platformRevenue, setPlatformRevenue] = useState<number | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
+    setLoadError(null);
     getPayouts()
       .then((res) => {
         setTotalToPayout(res.totalToPayout);
@@ -19,11 +22,15 @@ export default function PayoutsPage() {
         setCommissionOwed(res.totalCommissionOwed ?? null);
         setPlatformRevenue(res.totalPlatformRevenue ?? null);
       })
-      .catch(() => {
+      .catch((err) => {
         setTotalToPayout(0);
         setDrivers([]);
         setCommissionOwed(null);
         setPlatformRevenue(null);
+        const msg = isAxiosError(err)
+          ? String(err.response?.data?.error || err.response?.data?.message || err.message || 'Request failed')
+          : 'Could not load payouts';
+        setLoadError(msg);
       })
       .finally(() => setLoading(false));
   }, []);
@@ -33,6 +40,14 @@ export default function PayoutsPage() {
   return (
     <div>
       <h1 className={styles.title}>Payouts</h1>
+      {loadError && (
+        <p className={styles.apiError} role="alert">
+          Could not load payouts: {loadError}. Confirm the API is deployed and{' '}
+          <code>SUPABASE_SERVICE_KEY</code> is set on the server (anon key returns empty data). Use the backend{' '}
+          <code>/health</code> endpoint (drop <code>/api</code> from the base URL) — <code>supabaseClient</code> should be{' '}
+          <code>service_role</code>.
+        </p>
+      )}
       <p className={styles.muted}>
         Card and Instant EFT (non-cash) completed trips. Cash / COD is excluded from these balances. Driver share 79% /
         platform 21% on eligible fares. Amount drivers owe from cash rides is deducted from future card payouts.

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { isAxiosError } from 'axios';
 import { api } from '../api/client';
 import styles from './PayoutsManagementPage.module.css';
 
@@ -46,6 +47,7 @@ interface PayoutDetails {
 export default function PayoutsManagementPage() {
   const [drivers, setDrivers] = useState<Driver[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [selectedDriver, setSelectedDriver] = useState<PayoutDetails | null>(null);
   const [processingPayout, setProcessingPayout] = useState(false);
   const [payoutAmount, setPayoutAmount] = useState('');
@@ -59,10 +61,16 @@ export default function PayoutsManagementPage() {
   const loadDrivers = async () => {
     try {
       setLoading(true);
+      setLoadError(null);
       const response = await api.get('/admin/payouts/pending');
       setDrivers(response.data.drivers);
     } catch (error) {
       console.error('Failed to load drivers:', error);
+      setDrivers([]);
+      const msg = isAxiosError(error)
+        ? String(error.response?.data?.error || error.response?.data?.message || error.message || 'Request failed')
+        : 'Could not load pending payouts';
+      setLoadError(msg);
     } finally {
       setLoading(false);
     }
@@ -145,9 +153,16 @@ export default function PayoutsManagementPage() {
       <div className={styles.header}>
         <h1>Driver Payouts</h1>
         <p className={styles.subtitle}>
-          Manage driver EFT earnings and process payouts (Instant EFT / EFT trips only; card and cash excluded).
+          Manage driver earnings and payouts (card and Instant EFT; cash excluded from balances).
         </p>
       </div>
+
+      {loadError && (
+        <p className={styles.apiError} role="alert">
+          Could not load payouts: {loadError}. Set <code>SUPABASE_SERVICE_KEY</code> on the API and verify{' '}
+          <code>/health</code> shows <code>service_role</code>.
+        </p>
+      )}
 
       <div className={styles.stats}>
         <div className={styles.statCard}>
@@ -180,7 +195,7 @@ export default function PayoutsManagementPage() {
             {drivers.length === 0 ? (
               <tr>
                 <td colSpan={8} className={styles.emptyState}>
-                  No pending payouts
+                  {loadError ? 'Failed to load — see message above' : 'No pending payouts'}
                 </td>
               </tr>
             ) : (
