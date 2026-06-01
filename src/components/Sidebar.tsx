@@ -8,12 +8,9 @@ import {
   ChevronRight,
   UserCircle,
   UserCheck,
-  MapPin,
   Activity,
   AlertTriangle,
   CreditCard,
-  BarChart3,
-  Receipt,
   FileText,
   MessageSquare,
   Scale,
@@ -56,7 +53,6 @@ const menuItems: MenuItem[] = [
     children: [
       { id: 'all-rides', label: 'All Rides', icon: <Car className="w-4 h-4" />, path: '/rides' },
       { id: 'active-rides', label: 'Active Rides', icon: <Activity className="w-4 h-4" />, path: '/rides/active' },
-      { id: 'trip-logs', label: 'Trip Logs', icon: <MapPin className="w-4 h-4" />, path: '/trip-logs' },
       { id: 'sos-alerts', label: 'SOS Alerts', icon: <AlertTriangle className="w-4 h-4" />, path: '/sos-alerts' },
     ],
   },
@@ -66,8 +62,6 @@ const menuItems: MenuItem[] = [
     icon: <DollarSign className="w-5 h-5" />,
     children: [
       { id: 'payouts', label: 'Payouts', icon: <CreditCard className="w-4 h-4" />, path: '/payouts' },
-      { id: 'analytics', label: 'Analytics', icon: <BarChart3 className="w-4 h-4" />, path: '/analytics' },
-      { id: 'receipts', label: 'Receipts', icon: <Receipt className="w-4 h-4" />, path: '/receipts' },
     ],
   },
   {

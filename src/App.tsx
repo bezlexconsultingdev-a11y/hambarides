@@ -9,7 +9,6 @@ import RidesPage from './pages/RidesPage';
 import ApplicationsPage from './pages/ApplicationsPage';
 import PayoutsPage from './pages/PayoutsPage';
 import PayoutsManagementPage from './pages/PayoutsManagementPage';
-import FinancialAnalyticsPage from './pages/FinancialAnalyticsPage';
 import SupportTicketsPage from './pages/SupportTicketsPage';
 import SystemConfigPage from './pages/SystemConfigPage';
 import DisputesPage from './pages/DisputesPage';
@@ -19,8 +18,6 @@ import TripSharingAnalyticsPage from './pages/TripSharingAnalyticsPage';
 import RideDrawerDemoPage from './pages/RideDrawerDemoPage';
 import MapDemoPage from './pages/MapDemoPage';
 import SosEventsPage from './pages/SosEventsPage';
-import ReceiptsPage from './pages/ReceiptsPage';
-import TripLogsPage from './pages/TripLogsPage';
 import PricingPage from './pages/PricingPage';
 import Notifications from './pages/Notifications';
 
@@ -52,16 +49,12 @@ function AppRoutes() {
         <Route path="trip-sharing" element={<TripSharingAnalyticsPage />} />
         <Route path="payouts" element={<PayoutsPage />} />
         <Route path="payouts-management" element={<PayoutsManagementPage />} />
-        <Route path="analytics" element={<FinancialAnalyticsPage />} />
-        <Route path="financial-analytics" element={<Navigate to="/analytics" replace />} />
         <Route path="support" element={<SupportTicketsPage />} />
         <Route path="system-config" element={<SystemConfigPage />} />
         <Route path="/disputes" element={<ProtectedRoute><DisputesPage /></ProtectedRoute>} />
         <Route path="performance" element={<ProtectedRoute><DriverPerformancePage /></ProtectedRoute>} />
         <Route path="rides" element={<RidesPage />} />
         <Route path="sos" element={<SosEventsPage />} />
-        <Route path="receipts" element={<ReceiptsPage />} />
-        <Route path="trip-logs" element={<TripLogsPage />} />
         <Route path="pricing" element={<PricingPage />} />
         <Route path="notifications" element={<Notifications />} />
         <Route path="ride-drawer" element={<RideDrawerDemoPage />} />

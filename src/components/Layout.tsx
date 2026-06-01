@@ -50,12 +50,6 @@ export default function Layout() {
             💰 Payout Management
           </Link>
           <Link
-            to="/analytics"
-            className={location.pathname === '/analytics' ? styles.navLinkActive : styles.navLink}
-          >
-            📊 Financial Analytics
-          </Link>
-          <Link
             to="/performance"
             className={location.pathname === '/performance' ? styles.navLinkActive : styles.navLink}
           >
@@ -84,18 +78,6 @@ export default function Layout() {
             className={location.pathname === '/sos' ? styles.navLinkActive : styles.navLink}
           >
             SOS events
-          </Link>
-          <Link
-            to="/receipts"
-            className={location.pathname === '/receipts' ? styles.navLinkActive : styles.navLink}
-          >
-            Receipts
-          </Link>
-          <Link
-            to="/trip-logs"
-            className={location.pathname === '/trip-logs' ? styles.navLinkActive : styles.navLink}
-          >
-            Trip logs
           </Link>
           <Link
             to="/notifications"

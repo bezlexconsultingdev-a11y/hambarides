@@ -88,7 +88,7 @@ export default function PayoutsManagementPage() {
     }
   };
 
-  const handleProcessPayout = async () => {
+  const handleRecordEftPayment = async () => {
     if (!selectedDriver) return;
 
     const amount = parseFloat(payoutAmount);
@@ -107,7 +107,7 @@ export default function PayoutsManagementPage() {
       return;
     }
 
-    if (!confirm(`Process payout of R${amount.toFixed(2)} to ${selectedDriver.driver.first_name} ${selectedDriver.driver.last_name}?`)) {
+    if (!confirm(`Has the EFT of R${amount.toFixed(2)} already been sent to ${selectedDriver.driver.first_name} ${selectedDriver.driver.last_name}? This will create a receipt for the driver.`)) {
       return;
     }
 
@@ -117,15 +117,15 @@ export default function PayoutsManagementPage() {
         amount,
         notes: payoutNotes
       });
-      alert('Payout processed successfully!');
+      alert('EFT payment recorded. The driver can now view their payout receipt.');
       setShowPayoutModal(false);
       setSelectedDriver(null);
       setPayoutAmount('');
       setPayoutNotes('');
       loadDrivers();
-    } catch (error: any) {
+    } catch (error) {
       console.error('Failed to process payout:', error);
-      alert(error.response?.data?.error || 'Failed to process payout');
+      alert(isAxiosError(error) ? error.response?.data?.error || 'Failed to record EFT payment' : 'Failed to record EFT payment');
     } finally {
       setProcessingPayout(false);
     }
@@ -275,7 +275,7 @@ export default function PayoutsManagementPage() {
                     </div>
                     <div className={styles.detailRow}>
                       <span>Account Number:</span>
-                      <span>****{selectedDriver.banking.account_number.slice(-4)}</span>
+                      <span>{selectedDriver.banking.account_number}</span>
                     </div>
                     <div className={styles.detailRow}>
                       <span>Account Type:</span>
@@ -344,10 +344,10 @@ export default function PayoutsManagementPage() {
               </button>
               <button
                 className={styles.confirmButton}
-                onClick={handleProcessPayout}
+                onClick={handleRecordEftPayment}
                 disabled={processingPayout || !selectedDriver.banking}
               >
-                {processingPayout ? 'Processing...' : `Confirm Payout - ${formatCurrency(parseFloat(payoutAmount) || 0)}`}
+                {processingPayout ? 'Recording...' : `Mark EFT Paid & Send Receipt - ${formatCurrency(parseFloat(payoutAmount) || 0)}`}
               </button>
             </div>
           </div>
