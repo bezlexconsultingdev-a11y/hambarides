@@ -83,6 +83,7 @@ export default function PayoutsPage() {
                 <th>Email</th>
                 <th>Completed trips</th>
                 <th>Total earned (R)</th>
+                <th>Cash rides owed (R)</th>
               </tr>
             </thead>
             <tbody>
@@ -92,6 +93,7 @@ export default function PayoutsPage() {
                   <td>{d.email}</td>
                   <td>{d.completed_rides}</td>
                   <td>{d.total_earned.toFixed(2)}</td>
+                  <td>{Number(d.amount_owed_from_cash_rides ?? 0).toFixed(2)}</td>
                 </tr>
               ))}
             </tbody>

@@ -12,6 +12,7 @@ interface Driver {
   total_earned: number;
   total_paid_out: number;
   available_balance: number;
+  amount_owed_from_cash_rides: number;
   total_rides: number;
   last_payout_date: string | null;
 }
@@ -26,6 +27,7 @@ interface PayoutDetails {
     total_paid_out: number;
     available_balance: number;
     total_rides_completed: number;
+    amount_owed_from_cash_rides: number;
   };
   banking: {
     bank_name: string;
@@ -153,7 +155,7 @@ export default function PayoutsManagementPage() {
       <div className={styles.header}>
         <h1>Driver Payouts</h1>
         <p className={styles.subtitle}>
-          Same rules as the driver payout screen: platform-collected earnings only; cash/COD excluded.
+          Card and EFT balances automatically recover the 21% platform amount owed from cash rides.
         </p>
       </div>
 
@@ -187,6 +189,7 @@ export default function PayoutsManagementPage() {
               <th>Total Earned</th>
               <th>Paid Out</th>
               <th>Available Balance</th>
+              <th>Cash Rides Owed</th>
               <th>Last Payout</th>
               <th>Action</th>
             </tr>
@@ -194,7 +197,7 @@ export default function PayoutsManagementPage() {
           <tbody>
             {drivers.length === 0 ? (
               <tr>
-                <td colSpan={8} className={styles.emptyState}>
+                <td colSpan={9} className={styles.emptyState}>
                   {loadError ? 'Failed to load — see message above' : 'No pending payouts'}
                 </td>
               </tr>
@@ -209,6 +212,7 @@ export default function PayoutsManagementPage() {
                   <td className={styles.balanceCell}>
                     {formatCurrency(driver.available_balance)}
                   </td>
+                  <td>{formatCurrency(driver.amount_owed_from_cash_rides || 0)}</td>
                   <td>{formatDate(driver.last_payout_date)}</td>
                   <td>
                     <button
@@ -253,6 +257,10 @@ export default function PayoutsManagementPage() {
                   <div className={styles.breakdownRow}>
                     <span>Previous Payouts:</span>
                     <span>-{formatCurrency(selectedDriver.driver.total_paid_out)}</span>
+                  </div>
+                  <div className={styles.breakdownRow}>
+                    <span>Still owed from cash rides:</span>
+                    <span>{formatCurrency(selectedDriver.driver.amount_owed_from_cash_rides || 0)}</span>
                   </div>
                   <div className={styles.breakdownRow + ' ' + styles.total}>
                     <span>Available Balance:</span>

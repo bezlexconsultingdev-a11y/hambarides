@@ -211,6 +211,7 @@ export interface PayoutDriverRow {
   email: string;
   completed_rides: number;
   total_earned: number;
+  amount_owed_from_cash_rides?: number;
 }
 
 export interface PayoutsResponse {
