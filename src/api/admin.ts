@@ -119,6 +119,13 @@ export interface DriverApplicationRow {
   license_expiry_date?: string | null;
   prdp_url?: string | null;
   commercial_insurance_url?: string | null;
+  signed_contract_url?: string | null;
+  bank_name?: string | null;
+  account_holder_name?: string | null;
+  account_number?: string | null;
+  account_type?: string | null;
+  branch_code?: string | null;
+  banking_verified?: boolean;
   status: string;
   submitted_at: string;
 }

@@ -3,12 +3,45 @@ import { getDrivers, getPendingApplications, approveApplication, declineApplicat
 import type { DriverRow, DriverApplicationRow } from '../api/admin';
 import styles from './TablePage.module.css';
 
+function splitDocumentUrls(value?: string | null): string[] {
+  return String(value || '')
+    .split(',')
+    .map((url) => url.trim())
+    .filter(Boolean);
+}
+
 function DocLink({ href, label }: { href: string; label: string }) {
-  if (!href?.trim()) return null;
+  const cleanHref = href?.trim();
+  if (!cleanHref) return null;
   return (
-    <a href={href} target="_blank" rel="noopener noreferrer" className={styles.docLink}>
+    <a href={cleanHref} target="_blank" rel="noopener noreferrer" className={styles.docLink}>
       {label}
     </a>
+  );
+}
+
+function DocLinks({ value, label, labels }: { value?: string | null; label: string; labels?: string[] }) {
+  const urls = splitDocumentUrls(value);
+  if (!urls.length) return null;
+  return (
+    <>
+      {urls.map((url, index) => (
+        <React.Fragment key={`${label}-${url}-${index}`}>
+          {index > 0 && ', '}
+          <DocLink href={url} label={labels?.[index] || (urls.length > 1 ? `${label} ${index + 1}` : label)} />
+        </React.Fragment>
+      ))}
+    </>
+  );
+}
+
+function hasBankingDetails(application: DriverApplicationRow) {
+  return Boolean(
+    application.bank_name?.trim() ||
+    application.account_holder_name?.trim() ||
+    application.account_number?.trim() ||
+    application.account_type?.trim() ||
+    application.branch_code?.trim()
   );
 }
 
@@ -138,14 +171,29 @@ export default function DriversPage() {
                       <td colSpan={9} className={styles.detailsCell}>
                         <div className={styles.detailsBox}>
                           <p><strong>Full address:</strong> {a.address}</p>
+                          {hasBankingDetails(a) && (
+                            <>
+                              <p><strong>Banking details:</strong></p>
+                              <ul className={styles.docList}>
+                                <li><strong>Bank:</strong> {a.bank_name || '-'}</li>
+                                <li><strong>Account holder:</strong> {a.account_holder_name || '-'}</li>
+                                <li><strong>Account number:</strong> {a.account_number || '-'}</li>
+                                <li><strong>Account type:</strong> {a.account_type || '-'}</li>
+                                <li><strong>Branch code:</strong> {a.branch_code || '-'}</li>
+                              </ul>
+                            </>
+                          )}
                           <p><strong>Documents (review all before approving):</strong></p>
                           <ul className={styles.docList}>
-                            <li><DocLink href={a.id_document_url} label="ID document" /></li>
-                            <li><DocLink href={a.selfie_url} label="Selfie / headshot" /></li>
-                            <li><DocLink href={a.police_clearance_url} label="Police clearance" /></li>
-                            <li><DocLink href={a.drivers_license_url} label="Driver's license" /></li>
+                            <li><DocLinks value={a.id_document_url} label="ID document" /></li>
+                            <li><DocLinks value={a.selfie_url} label="Selfie / headshot" /></li>
+                            <li><DocLinks value={a.police_clearance_url} label="Police clearance" /></li>
+                            <li><DocLinks value={a.drivers_license_url} label="Driver's license" labels={["Driver's license front", "Driver's license back"]} /></li>
+                            {a.prdp_url?.trim() && <li><DocLinks value={a.prdp_url} label="PrDP" /></li>}
+                            {a.commercial_insurance_url?.trim() && <li><DocLinks value={a.commercial_insurance_url} label="Commercial insurance" /></li>}
+                            {a.signed_contract_url?.trim() && <li><DocLinks value={a.signed_contract_url} label="Signed driver contract" /></li>}
                             <li>
-                              Vehicle photos: {a.vehicle_photos_urls?.split(',').map((url, i) => (
+                              Vehicle documents/photos: {splitDocumentUrls(a.vehicle_photos_urls).map((url, i) => (
                                 <React.Fragment key={i}>
                                   {i > 0 && ', '}
                                   <DocLink href={url.trim()} label={`Photo ${i + 1}`} />

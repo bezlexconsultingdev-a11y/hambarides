@@ -15,6 +15,14 @@ interface Driver {
   amount_owed_from_cash_rides: number;
   total_rides: number;
   last_payout_date: string | null;
+  banking: {
+    bank_name: string;
+    account_holder_name: string;
+    account_number: string;
+    account_type: string;
+    branch_code: string;
+    verified: boolean;
+  } | null;
 }
 
 interface PayoutDetails {
@@ -190,6 +198,8 @@ export default function PayoutsManagementPage() {
               <th>Paid Out</th>
               <th>Available Balance</th>
               <th>Cash Rides Owed</th>
+              <th>Bank</th>
+              <th>Account Number</th>
               <th>Last Payout</th>
               <th>Action</th>
             </tr>
@@ -197,7 +207,7 @@ export default function PayoutsManagementPage() {
           <tbody>
             {drivers.length === 0 ? (
               <tr>
-                <td colSpan={9} className={styles.emptyState}>
+                <td colSpan={11} className={styles.emptyState}>
                   {loadError ? 'Failed to load — see message above' : 'No pending payouts'}
                 </td>
               </tr>
@@ -213,6 +223,8 @@ export default function PayoutsManagementPage() {
                     {formatCurrency(driver.available_balance)}
                   </td>
                   <td>{formatCurrency(driver.amount_owed_from_cash_rides || 0)}</td>
+                  <td>{driver.banking?.bank_name || 'No banking details'}</td>
+                  <td>{driver.banking?.account_number || '-'}</td>
                   <td>{formatDate(driver.last_payout_date)}</td>
                   <td>
                     <button
