@@ -129,7 +129,6 @@ export default function ApplicationsPage() {
                 <th>Email</th>
                 <th>Country of birth</th>
                 <th>Address</th>
-                <th>Police clearance date</th>
                 <th>Submitted</th>
                 <th>Actions</th>
               </tr>
@@ -153,7 +152,6 @@ export default function ApplicationsPage() {
                     <td>{a.email}</td>
                     <td>{a.country_of_birth}</td>
                     <td className={styles.cellClip}>{a.address}</td>
-                    <td>{a.police_clearance_issue_date}</td>
                     <td>{new Date(a.submitted_at).toLocaleString()}</td>
                     <td>
                       {declineReason?.id === a.id ? (
@@ -180,7 +178,7 @@ export default function ApplicationsPage() {
                   </tr>
                   {expandedId === a.id && (
                     <tr key={`${a.id}-details`}>
-                      <td colSpan={9} className={styles.detailsCell}>
+                      <td colSpan={8} className={styles.detailsCell}>
                         <div className={styles.detailsBox}>
                           <p><strong>Full address:</strong> {a.address}</p>
                           {(a.license_expiry_date != null && a.license_expiry_date !== '') && (
@@ -202,10 +200,8 @@ export default function ApplicationsPage() {
                           <ul className={styles.docList}>
                             <li><DocLinks value={a.id_document_url} label="ID document" /></li>
                             <li><DocLinks value={a.selfie_url} label="Selfie / headshot" /></li>
-                            <li><DocLinks value={a.police_clearance_url} label="Police clearance" /></li>
                             <li><DocLinks value={a.drivers_license_url} label="Driver's license" labels={["Driver's license front", "Driver's license back"]} /></li>
                             {a.prdp_url?.trim() && <li><DocLinks value={a.prdp_url} label="PrDP" /></li>}
-                            {a.commercial_insurance_url?.trim() && <li><DocLinks value={a.commercial_insurance_url} label="Commercial insurance" /></li>}
                             {a.signed_contract_url?.trim() && <li><DocLinks value={a.signed_contract_url} label="Signed driver contract" /></li>}
                             <li>
                               Vehicle documents/photos: {splitDocumentUrls(a.vehicle_photos_urls).map((url, i) => (
