@@ -44,6 +44,7 @@ const menuItems: MenuItem[] = [
       { id: 'all-users', label: 'All Users', icon: <UserCircle className="w-4 h-4" />, path: '/users' },
       { id: 'riders', label: 'Riders', icon: <Users className="w-4 h-4" />, path: '/riders' },
       { id: 'drivers', label: 'Drivers', icon: <UserCheck className="w-4 h-4" />, path: '/drivers' },
+      { id: 'driver-management', label: 'Driver Management', icon: <UserCheck className="w-4 h-4" />, path: '/driver-management' },
     ],
   },
   {

@@ -53,6 +53,7 @@ export default function Layout() {
     { to: '/', label: 'Dashboard' },
     { to: '/users', label: 'Users' },
     { to: '/drivers', label: 'Drivers' },
+    { to: '/driver-management', label: 'Driver Management' },
     { to: '/applications', label: 'Applications' },
     { to: '/payouts', label: 'Payouts' },
     { to: '/payouts-management', label: 'Payout Management' },

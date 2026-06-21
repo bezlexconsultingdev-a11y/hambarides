@@ -71,6 +71,41 @@ export interface DriverRow {
   phone?: string;
   email?: string;
   created_at: string;
+  application_status?: string | null;
+  license_expiry_date?: string | null;
+  application?: DriverManagementApplication | null;
+  banking?: DriverBankingDetails | null;
+}
+
+export interface DriverBankingDetails {
+  driver_id: number | string;
+  bank_name?: string | null;
+  account_holder_name?: string | null;
+  account_number?: string | null;
+  account_type?: string | null;
+  branch_code?: string | null;
+  verified?: boolean;
+}
+
+export interface DriverManagementApplication {
+  id: number;
+  driver_id: number | string;
+  full_name?: string | null;
+  country_of_birth?: string | null;
+  address?: string | null;
+  id_document_url?: string | null;
+  selfie_url?: string | null;
+  police_clearance_url?: string | null;
+  police_clearance_issue_date?: string | null;
+  vehicle_photos_urls?: string | null;
+  drivers_license_url?: string | null;
+  license_expiry_date?: string | null;
+  prdp_url?: string | null;
+  commercial_insurance_url?: string | null;
+  signed_contract_url?: string | null;
+  status?: string | null;
+  submitted_at?: string | null;
+  created_at?: string | null;
 }
 
 export async function getDrivers(params?: { limit?: number; offset?: number }): Promise<{ drivers: DriverRow[] }> {
@@ -98,6 +133,10 @@ export async function getDrivers(params?: { limit?: number; offset?: number }): 
     phone: d.phone != null ? String(d.phone) : undefined,
     email: d.email != null ? String(d.email) : undefined,
     created_at: String(d.created_at ?? ''),
+    application_status: d.application_status != null ? String(d.application_status) : null,
+    license_expiry_date: d.license_expiry_date != null ? String(d.license_expiry_date) : null,
+    application: (d.application as DriverManagementApplication | null | undefined) ?? null,
+    banking: (d.banking as DriverBankingDetails | null | undefined) ?? null,
   }));
   return { drivers };
 }
