@@ -13,6 +13,7 @@ interface Driver {
   total_paid_out: number;
   available_balance: number;
   amount_owed_from_cash_rides: number;
+  cash_commission_remaining_from_cash_rides?: number;
   total_rides: number;
   last_payout_date: string | null;
   banking: {
@@ -36,6 +37,7 @@ interface PayoutDetails {
     available_balance: number;
     total_rides_completed: number;
     amount_owed_from_cash_rides: number;
+    cash_commission_remaining_from_cash_rides?: number;
   };
   banking: {
     bank_name: string;
@@ -197,7 +199,7 @@ export default function PayoutsManagementPage() {
               <th>Total Earned</th>
               <th>Paid Out</th>
               <th>Available Balance</th>
-              <th>Cash Rides Owed</th>
+              <th>Cash Commission</th>
               <th>Bank</th>
               <th>Account Number</th>
               <th>Last Payout</th>
@@ -222,7 +224,14 @@ export default function PayoutsManagementPage() {
                   <td className={styles.balanceCell}>
                     {formatCurrency(driver.available_balance)}
                   </td>
-                  <td>{formatCurrency(driver.amount_owed_from_cash_rides || 0)}</td>
+                  <td>
+                    {formatCurrency(driver.amount_owed_from_cash_rides || 0)}
+                    {driver.cash_commission_remaining_from_cash_rides ? (
+                      <div className={styles.miniNote}>
+                        Remaining: {formatCurrency(driver.cash_commission_remaining_from_cash_rides)}
+                      </div>
+                    ) : null}
+                  </td>
                   <td>{driver.banking?.bank_name || 'No banking details'}</td>
                   <td>{driver.banking?.account_number || '-'}</td>
                   <td>{formatDate(driver.last_payout_date)}</td>
@@ -271,8 +280,12 @@ export default function PayoutsManagementPage() {
                     <span>-{formatCurrency(selectedDriver.driver.total_paid_out)}</span>
                   </div>
                   <div className={styles.breakdownRow}>
-                    <span>Still owed from cash rides:</span>
+                    <span>Cash commission created:</span>
                     <span>{formatCurrency(selectedDriver.driver.amount_owed_from_cash_rides || 0)}</span>
+                  </div>
+                  <div className={styles.breakdownRow}>
+                    <span>Remaining after deductions:</span>
+                    <span>{formatCurrency(selectedDriver.driver.cash_commission_remaining_from_cash_rides || 0)}</span>
                   </div>
                   <div className={styles.breakdownRow + ' ' + styles.total}>
                     <span>Available Balance:</span>

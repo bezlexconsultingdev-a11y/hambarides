@@ -66,7 +66,7 @@ export default function PayoutsPage() {
       )}
       {commissionOwed != null && commissionOwed > 0 && (
         <div className={styles.payoutSummary}>
-          <span className={styles.payoutLabel}>Amount drivers owe (from cash rides)</span>
+          <span className={styles.payoutLabel}>Cash commission created (21% from cash rides)</span>
           <span className={styles.payoutValue}>R {commissionOwed.toFixed(2)}</span>
         </div>
       )}
@@ -83,7 +83,7 @@ export default function PayoutsPage() {
                 <th>Email</th>
                 <th>Completed trips</th>
                 <th>Total earned (R)</th>
-                <th>Cash rides owed (R)</th>
+                <th>Cash commission created (R)</th>
               </tr>
             </thead>
             <tbody>

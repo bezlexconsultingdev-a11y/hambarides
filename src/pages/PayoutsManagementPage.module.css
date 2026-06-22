@@ -91,6 +91,13 @@
   color: #28a745;
 }
 
+.miniNote {
+  margin-top: 0.25rem;
+  color: #6c757d;
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
 .emptyState {
   text-align: center;
   padding: 3rem !important;

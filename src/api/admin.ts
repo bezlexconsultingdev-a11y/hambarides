@@ -258,6 +258,7 @@ export interface PayoutDriverRow {
   completed_rides: number;
   total_earned: number;
   amount_owed_from_cash_rides?: number;
+  cash_commission_remaining_from_cash_rides?: number;
 }
 
 export interface PayoutsResponse {
