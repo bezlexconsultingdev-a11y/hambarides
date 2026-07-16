@@ -1,9 +1,50 @@
 .title {
-  margin: 0 0 28px;
-  font-size: 1.6rem;
-  font-weight: 700;
+  margin: 0;
+  font-size: 1.7rem;
+  font-weight: 800;
   color: #001489;
   letter-spacing: -0.02em;
+}
+
+.subtitle {
+  margin: 6px 0 0;
+  color: #64748b;
+  font-size: 0.95rem;
+}
+
+.headerRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 22px;
+}
+
+.quickLinks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.quickLink,
+.quickLinkPrimary {
+  text-decoration: none;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.quickLink {
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  color: #0f172a;
+}
+
+.quickLinkPrimary {
+  background: #007749;
+  color: #fff;
 }
 
 .loading,
@@ -13,34 +54,73 @@
 }
 
 .error {
-  color: #E03C31;
+  color: #e03c31;
 }
 
-.grid {
+.primaryGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 14px;
+  margin-bottom: 28px;
 }
 
-.card {
-  background: #FFFFFF;
-  border: 1px solid #e0e0e0;
-  border-radius: 14px;
-  padding: 22px;
+.primaryCard {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 20px;
   display: flex;
   flex-direction: column;
   gap: 10px;
+  text-decoration: none;
+  transition: border-color 0.15s;
 }
 
-.cardLabel {
-  font-size: 0.8rem;
-  color: #555;
+.primaryCard:hover {
+  border-color: #007749;
+}
+
+.sectionTitle {
+  margin: 0 0 12px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #334155;
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
 
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 12px;
+}
+
+.card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cardLabel {
+  font-size: 0.75rem;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 600;
+}
+
 .cardValue {
-  font-size: 1.55rem;
+  font-size: 1.7rem;
+  font-weight: 800;
+  color: #007749;
+}
+
+.cardValueSmall {
+  font-size: 1.25rem;
   font-weight: 700;
   color: #007749;
 }

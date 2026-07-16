@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Link } from 'react-router-dom';
 import { getPendingApplications, approveApplication, declineApplication } from '../api/admin';
 import type { DriverApplicationRow } from '../api/admin';
+import DriversTabs from '../components/DriversTabs';
 import styles from './TablePage.module.css';
 
 function splitDocumentUrls(value?: string | null): string[] {
@@ -112,8 +112,9 @@ export default function ApplicationsPage() {
   return (
     <div>
       <h1 className={styles.title}>Driver applications</h1>
+      <DriversTabs />
       <p className={styles.muted}>
-        Pending applications only. <Link to="/drivers">View all drivers</Link>.
+        Pending applications only. Banking details submitted with the application are shown when you expand a row.
       </p>
       {error ? <p className={styles.muted} style={{ color: '#b91c1c' }}>{error}</p> : null}
       {applications.length === 0 ? (

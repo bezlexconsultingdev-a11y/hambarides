@@ -165,7 +165,8 @@ export default function PayoutsManagementPage() {
       <div className={styles.header}>
         <h1>Driver Payouts</h1>
         <p className={styles.subtitle}>
-          Card and EFT balances automatically recover the 21% platform amount owed from cash rides.
+          Full banking details are shown so you can send EFTs. Card and EFT balances automatically recover the 21%
+          platform amount owed from cash rides.
         </p>
       </div>
 
@@ -193,37 +194,36 @@ export default function PayoutsManagementPage() {
         <table className={styles.table}>
           <thead>
             <tr>
-              <th>Driver Name</th>
-              <th>Email</th>
-              <th>Total Rides</th>
-              <th>Total Earned</th>
-              <th>Paid Out</th>
-              <th>Available Balance</th>
-              <th>Cash Commission</th>
+              <th>Driver</th>
+              <th>Balance</th>
+              <th>Cash commission</th>
               <th>Bank</th>
-              <th>Account Number</th>
-              <th>Last Payout</th>
+              <th>Account holder</th>
+              <th>Account number</th>
+              <th>Branch</th>
+              <th>Type</th>
+              <th>Last payout</th>
               <th>Action</th>
             </tr>
           </thead>
           <tbody>
             {drivers.length === 0 ? (
               <tr>
-                <td colSpan={11} className={styles.emptyState}>
+                <td colSpan={10} className={styles.emptyState}>
                   {loadError ? 'Failed to load — see message above' : 'No pending payouts'}
                 </td>
               </tr>
             ) : (
               drivers.map((driver) => (
                 <tr key={driver.driver_id}>
-                  <td>{driver.first_name} {driver.last_name}</td>
-                  <td>{driver.email}</td>
-                  <td>{driver.total_rides}</td>
-                  <td>{formatCurrency(driver.total_earned)}</td>
-                  <td>{formatCurrency(driver.total_paid_out)}</td>
-                  <td className={styles.balanceCell}>
-                    {formatCurrency(driver.available_balance)}
+                  <td>
+                    <div className={styles.driverName}>
+                      {driver.first_name} {driver.last_name}
+                    </div>
+                    <div className={styles.driverEmail}>{driver.email}</div>
+                    <div className={styles.miniNote}>{driver.total_rides} rides · earned {formatCurrency(driver.total_earned)}</div>
                   </td>
+                  <td className={styles.balanceCell}>{formatCurrency(driver.available_balance)}</td>
                   <td>
                     {formatCurrency(driver.amount_owed_from_cash_rides || 0)}
                     {driver.cash_commission_remaining_from_cash_rides ? (
@@ -232,15 +232,24 @@ export default function PayoutsManagementPage() {
                       </div>
                     ) : null}
                   </td>
-                  <td>{driver.banking?.bank_name || 'No banking details'}</td>
-                  <td>{driver.banking?.account_number || '-'}</td>
+                  <td className={styles.bankingCell}>{driver.banking?.bank_name || 'Missing'}</td>
+                  <td className={styles.bankingCell}>{driver.banking?.account_holder_name || '—'}</td>
+                  <td className={styles.accountNumber}>{driver.banking?.account_number || '—'}</td>
+                  <td className={styles.bankingCell}>{driver.banking?.branch_code || '—'}</td>
+                  <td className={styles.bankingCell}>{driver.banking?.account_type || '—'}</td>
                   <td>{formatDate(driver.last_payout_date)}</td>
                   <td>
                     <button
                       className={styles.payButton}
                       onClick={() => handlePayNow(driver.driver_id)}
+                      disabled={!driver.banking?.account_number}
+                      title={
+                        driver.banking?.account_number
+                          ? 'Open payout with full banking details'
+                          : 'Driver has no banking details on file'
+                      }
                     >
-                      Pay Now
+                      {driver.banking?.account_number ? 'Pay now' : 'No bank details'}
                     </button>
                   </td>
                 </tr>
@@ -296,7 +305,7 @@ export default function PayoutsManagementPage() {
 
               {selectedDriver.banking ? (
                 <div className={styles.section}>
-                  <h3>Banking Details</h3>
+                  <h3>Banking details for EFT</h3>
                   <div className={styles.bankingDetails}>
                     <div className={styles.detailRow}>
                       <span>Bank:</span>
@@ -308,7 +317,7 @@ export default function PayoutsManagementPage() {
                     </div>
                     <div className={styles.detailRow}>
                       <span>Account Number:</span>
-                      <span>{selectedDriver.banking.account_number}</span>
+                      <span className={styles.accountNumber}>{selectedDriver.banking.account_number}</span>
                     </div>
                     <div className={styles.detailRow}>
                       <span>Account Type:</span>
@@ -321,9 +330,7 @@ export default function PayoutsManagementPage() {
                   </div>
                 </div>
               ) : (
-                <div className={styles.warning}>
-                  ⚠️ No banking details on file
-                </div>
+                <div className={styles.warning}>No banking details on file — cannot process payout</div>
               )}
 
               {selectedDriver.previousPayouts.length > 0 && (

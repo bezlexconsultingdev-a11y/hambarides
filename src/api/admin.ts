@@ -64,6 +64,8 @@ export interface DriverRow {
   vehicle_color: string;
   vehicle_plate_number: string;
   is_available: boolean;
+  is_online?: boolean;
+  verification_status?: string | null;
   rating: number;
   total_rides: number;
   first_name?: string;
@@ -104,6 +106,8 @@ export interface DriverManagementApplication {
   commercial_insurance_url?: string | null;
   signed_contract_url?: string | null;
   status?: string | null;
+  decline_reason?: string | null;
+  reviewed_at?: string | null;
   submitted_at?: string | null;
   created_at?: string | null;
 }
@@ -126,6 +130,8 @@ export async function getDrivers(params?: { limit?: number; offset?: number }): 
     vehicle_color: String(d.vehicle_color ?? ''),
     vehicle_plate_number: String(d.vehicle_plate_number ?? ''),
     is_available: Boolean(d.is_available),
+    is_online: d.is_online != null ? Boolean(d.is_online) : undefined,
+    verification_status: d.verification_status != null ? String(d.verification_status) : null,
     rating: Number(d.rating ?? 0),
     total_rides: Number(d.total_rides ?? 0),
     first_name: d.first_name != null ? String(d.first_name) : undefined,
@@ -139,6 +145,31 @@ export async function getDrivers(params?: { limit?: number; offset?: number }): 
     banking: (d.banking as DriverBankingDetails | null | undefined) ?? null,
   }));
   return { drivers };
+}
+
+export async function revokeDriverAccess(
+  driverId: number | string,
+  reason: string
+): Promise<{ ok: boolean; driver: Partial<DriverRow> & { revoke_reason?: string; revoked_at?: string } }> {
+  const { data } = await api.post(`/admin/drivers/${driverId}/revoke`, { reason });
+  return data as { ok: boolean; driver: Partial<DriverRow> & { revoke_reason?: string; revoked_at?: string } };
+}
+
+export async function restoreDriverAccess(
+  driverId: number | string
+): Promise<{ ok: boolean; driver: Partial<DriverRow> }> {
+  const { data } = await api.post(`/admin/drivers/${driverId}/restore`);
+  return data as { ok: boolean; driver: Partial<DriverRow> };
+}
+
+export async function hardDeleteDriver(
+  driverId: number | string,
+  confirmEmail: string
+): Promise<{ ok: boolean }> {
+  const { data } = await api.delete(`/admin/drivers/${driverId}`, {
+    data: { confirm_email: confirmEmail },
+  });
+  return data as { ok: boolean };
 }
 
 export interface DriverApplicationRow {

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { getDrivers, getPendingApplications, approveApplication, declineApplication } from '../api/admin';
 import type { DriverRow, DriverApplicationRow } from '../api/admin';
+import DriversTabs from '../components/DriversTabs';
 import styles from './TablePage.module.css';
 
 function splitDocumentUrls(value?: string | null): string[] {
@@ -100,6 +101,7 @@ export default function DriversPage() {
   return (
     <div>
       <h1 className={styles.title}>Drivers</h1>
+      <DriversTabs />
 
       <h2 className={styles.subtitle}>Pending driver applications</h2>
       {appLoading ? (

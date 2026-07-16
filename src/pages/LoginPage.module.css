@@ -1,25 +1,53 @@
 .page {
   min-height: 100vh;
+  background: #f8f7f5;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #0f0f0f;
-  color: #e5e5e5;
+  padding: 24px;
 }
 
 .card {
   width: 100%;
-  max-width: 380px;
-  background: #1a1a1a;
-  border: 1px solid #2a2a2a;
-  border-radius: 12px;
-  padding: 32px;
+  max-width: 420px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  padding: 32px 28px;
+}
+
+.brand {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.brandName {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 800;
+  color: #007749;
+  letter-spacing: -0.02em;
+}
+
+.brandSub {
+  margin: 4px 0 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #001489;
+}
+
+.slogan {
+  margin: 8px 0 0;
+  font-size: 0.9rem;
+  color: #64748b;
 }
 
 .title {
-  margin: 0 0 24px;
-  font-size: 1.5rem;
-  font-weight: 600;
+  margin: 0 0 20px;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #0f172a;
+  text-align: center;
 }
 
 .form {
@@ -29,49 +57,75 @@
 }
 
 .error {
-  padding: 10px 12px;
-  background: #2a1a1a;
-  color: #ff6b6b;
-  border-radius: 8px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+  border-radius: 10px;
+  padding: 12px 14px;
   font-size: 0.9rem;
+  font-weight: 600;
 }
 
 .label {
-  font-size: 0.9rem;
-  color: #a0a0a0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #334155;
 }
 
 .input {
-  padding: 12px 14px;
-  background: #252525;
-  border: 1px solid #333;
-  border-radius: 8px;
-  color: #fff;
+  width: 100%;
+  box-sizing: border-box;
+  height: 48px;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  padding: 0 14px;
   font-size: 1rem;
+  color: #0f172a;
+  background: #f8fafc;
 }
 
-.input:focus {
-  outline: none;
-  border-color: #0a84ff;
+.passwordRow {
+  position: relative;
 }
 
-.button {
-  padding: 12px 16px;
-  background: #0a84ff;
+.passwordRow .input {
+  padding-right: 72px;
+}
+
+.eyeBtn {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
   border: none;
-  border-radius: 8px;
+  background: transparent;
+  color: #007749;
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+  padding: 8px;
+}
+
+.submit {
+  height: 50px;
+  border: none;
+  border-radius: 12px;
+  background: #007749;
   color: #fff;
   font-size: 1rem;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
-  margin-top: 8px;
+  margin-top: 4px;
 }
 
-.button:hover:not(:disabled) {
-  background: #0066cc;
-}
-
-.button:disabled {
-  opacity: 0.6;
+.submit:disabled {
+  opacity: 0.65;
   cursor: not-allowed;
+}
+
+.submit:hover:not(:disabled) {
+  background: #006040;
 }

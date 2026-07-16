@@ -1,59 +1,61 @@
 .container {
-  padding: 2rem;
   max-width: 1400px;
-  margin: 0 auto;
 }
 
 .header {
-  margin-bottom: 2rem;
+  margin-bottom: 1.25rem;
 }
 
 .header h1 {
-  font-size: 2rem;
-  font-weight: 700;
-  color: #1a1a1a;
+  font-size: 1.7rem;
+  font-weight: 800;
+  color: #001489;
   margin: 0 0 0.5rem 0;
+  letter-spacing: -0.02em;
 }
 
 .subtitle {
-  color: #666;
-  font-size: 1rem;
+  color: #64748b;
+  font-size: 0.95rem;
   margin: 0;
+  max-width: 720px;
+  line-height: 1.45;
 }
 
 .stats {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px;
+  margin-bottom: 1.25rem;
 }
 
 .statCard {
   background: white;
-  padding: 1.5rem;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 1.25rem;
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
 }
 
 .statLabel {
-  font-size: 0.875rem;
-  color: #666;
+  font-size: 0.75rem;
+  color: #64748b;
   margin-bottom: 0.5rem;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.04em;
+  font-weight: 700;
 }
 
 .statValue {
-  font-size: 2rem;
-  font-weight: 700;
-  color: #1a1a1a;
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: #007749;
 }
 
 .tableContainer {
   background: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  overflow-x: auto;
 }
 
 .table {
@@ -62,61 +64,93 @@
 }
 
 .table thead {
-  background: #f8f9fa;
+  background: #f8fafc;
 }
 
 .table th {
-  padding: 1rem;
+  padding: 0.9rem 1rem;
   text-align: left;
-  font-weight: 600;
-  color: #1a1a1a;
-  font-size: 0.875rem;
+  font-weight: 700;
+  color: #334155;
+  font-size: 0.75rem;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  border-bottom: 2px solid #e9ecef;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid #e2e8f0;
+  white-space: nowrap;
 }
 
 .table td {
-  padding: 1rem;
-  border-bottom: 1px solid #e9ecef;
-  color: #495057;
+  padding: 0.9rem 1rem;
+  border-bottom: 1px solid #e2e8f0;
+  color: #334155;
+  vertical-align: top;
 }
 
 .table tbody tr:hover {
-  background: #f8f9fa;
+  background: #f8fafc;
+}
+
+.driverName {
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.driverEmail {
+  color: #64748b;
+  font-size: 0.85rem;
+  margin-top: 2px;
 }
 
 .balanceCell {
+  font-weight: 800;
+  color: #007749;
+  white-space: nowrap;
+}
+
+.bankingCell {
   font-weight: 600;
-  color: #28a745;
+  color: #0f172a;
+}
+
+.accountNumber {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-weight: 700;
+  color: #001489;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
 }
 
 .miniNote {
   margin-top: 0.25rem;
-  color: #6c757d;
+  color: #64748b;
   font-size: 0.8rem;
+}
+
+.payButton {
+  background: #007749;
+  color: white;
+  border: none;
+  padding: 0.55rem 0.9rem;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
   white-space: nowrap;
+}
+
+.payButton:hover:not(:disabled) {
+  background: #006040;
+}
+
+.payButton:disabled {
+  background: #cbd5e1;
+  color: #64748b;
+  cursor: not-allowed;
 }
 
 .emptyState {
   text-align: center;
   padding: 3rem !important;
   color: #999;
-}
-
-.payButton {
-  background: #007bff;
-  color: white;
-  border: none;
-  padding: 0.5rem 1.5rem;
-  border-radius: 6px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.payButton:hover {
-  background: #0056b3;
 }
 
 .loading {
@@ -336,18 +370,17 @@
 }
 
 .confirmButton {
-  background: #28a745;
+  background: #007749;
   color: white;
   border: none;
   padding: 0.75rem 1.5rem;
-  border-radius: 6px;
-  font-weight: 600;
+  border-radius: 10px;
+  font-weight: 700;
   cursor: pointer;
-  transition: background 0.2s;
 }
 
 .confirmButton:hover {
-  background: #218838;
+  background: #006040;
 }
 
 .confirmButton:disabled {

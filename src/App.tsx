@@ -8,7 +8,6 @@ import DriversPage from './pages/DriversPage';
 import DriverManagementPage from './pages/DriverManagementPage';
 import RidesPage from './pages/RidesPage';
 import ApplicationsPage from './pages/ApplicationsPage';
-import PayoutsPage from './pages/PayoutsPage';
 import PayoutsManagementPage from './pages/PayoutsManagementPage';
 import SupportTicketsPage from './pages/SupportTicketsPage';
 import SystemConfigPage from './pages/SystemConfigPage';
@@ -49,7 +48,7 @@ function AppRoutes() {
         <Route path="applications-enhanced" element={<ApplicationsPage />} />
         <Route path="sos-alerts" element={<SOSAlertsPage />} />
         <Route path="trip-sharing" element={<TripSharingAnalyticsPage />} />
-        <Route path="payouts" element={<PayoutsPage />} />
+        <Route path="payouts" element={<Navigate to="/payouts-management" replace />} />
         <Route path="payouts-management" element={<PayoutsManagementPage />} />
         <Route path="support" element={<SupportTicketsPage />} />
         <Route path="system-config" element={<SystemConfigPage />} />

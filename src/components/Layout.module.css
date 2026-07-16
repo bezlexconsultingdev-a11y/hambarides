@@ -1,6 +1,6 @@
 .layout {
   min-height: 100vh;
-  background: #F8F7F5;
+  background: #f8f7f5;
   color: #1a1a1a;
 }
 
@@ -10,17 +10,17 @@
   position: fixed;
   inset: 0 auto 0 0;
   z-index: 30;
-  background: #FFFFFF;
-  border-right: 1px solid #e0e0e0;
+  background: #ffffff;
+  border-right: 1px solid #e2e8f0;
   display: flex;
   flex-direction: column;
   transform: translateX(-105%);
   transition: transform 0.2s ease;
-  box-shadow: 12px 0 34px rgba(15, 23, 42, 0.12);
 }
 
 .sidebarOpen {
   transform: translateX(0);
+  box-shadow: 12px 0 34px rgba(15, 23, 42, 0.12);
 }
 
 .backdrop {
@@ -39,25 +39,31 @@
 }
 
 .sidebarHeader {
-  padding: 18px 20px;
-  border-bottom: 1px solid #e0e0e0;
+  padding: 20px 18px 16px;
+  border-bottom: 1px solid #e2e8f0;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 10px;
 }
 
-.logoImage {
-  width: 34px;
-  height: 34px;
-  border-radius: 10px;
+.brandBlock {
+  flex: 1;
+  min-width: 0;
 }
 
-.logo {
-  font-size: 1.35rem;
-  font-weight: 800;
+.brandName {
   margin: 0;
-  color: #001489;
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #007749;
   letter-spacing: -0.02em;
+}
+
+.brandSub {
+  margin: 2px 0 0;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #001489;
 }
 
 .closeMenuBtn {
@@ -70,47 +76,66 @@
   cursor: pointer;
   font-weight: 800;
   color: #334155;
+  font-size: 1.2rem;
+  line-height: 1;
 }
 
 .nav {
   flex: 1;
-  padding: 20px 14px;
+  padding: 14px 12px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  overflow-y: auto;
+}
+
+.navGroup {
   display: flex;
   flex-direction: column;
   gap: 2px;
 }
 
+.navGroupLabel {
+  margin: 0 0 4px;
+  padding: 0 12px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #94a3b8;
+}
+
 .navLink,
 .navLinkActive {
-  padding: 12px 16px;
+  padding: 10px 14px;
   border-radius: 10px;
   text-decoration: none;
-  color: #555;
-  font-size: 0.95rem;
+  color: #475569;
+  font-size: 0.92rem;
   font-weight: 500;
   transition: background 0.15s, color 0.15s;
 }
 
 .navLink:hover {
-  background: #f0f0f0;
+  background: #f8fafc;
   color: #001489;
 }
 
 .navLinkActive {
   background: #f0f9f4;
   color: #007749;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .sidebarFooter {
-  padding: 20px;
-  border-top: 1px solid #e0e0e0;
+  padding: 16px 18px 20px;
+  border-top: 1px solid #e2e8f0;
 }
 
 .userEmail {
   display: block;
-  font-size: 0.8rem;
-  color: #666;
+  font-size: 0.78rem;
+  color: #64748b;
   margin-bottom: 10px;
   word-break: break-all;
 }
@@ -118,21 +143,21 @@
 .logoutBtn {
   width: 100%;
   padding: 10px 14px;
-  background: #FFFFFF;
-  border: 2px solid #E03C31;
+  background: #ffffff;
+  border: 1.5px solid #e03c31;
   border-radius: 10px;
-  color: #E03C31;
+  color: #e03c31;
   cursor: pointer;
   font-size: 0.9rem;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .logoutBtn:hover {
-  background: #ffebee;
+  background: #fef2f2;
 }
 
 .main {
-  padding: 28px 32px;
+  padding: 24px 28px 36px;
   overflow: auto;
   min-height: 100vh;
 }
@@ -141,25 +166,24 @@
   display: flex;
   align-items: center;
   gap: 14px;
-  margin: -6px 0 22px;
+  margin: 0 0 22px;
 }
 
 .menuBtn {
   width: 44px;
   height: 44px;
   border: 0;
-  border-radius: 14px;
+  border-radius: 12px;
   background: #007749;
   color: #fff;
   cursor: pointer;
-  font-size: 1.45rem;
+  font-size: 1.35rem;
   line-height: 1;
-  box-shadow: 0 10px 20px rgba(0, 119, 73, 0.18);
 }
 
 .greeting {
   margin: 0;
-  color: #101827;
+  color: #0f172a;
   font-size: 1.05rem;
   font-weight: 800;
 }
@@ -194,14 +218,26 @@
   opacity: 0.6;
 }
 
-@media (max-width: 720px) {
-  .main {
-    padding: 18px 14px 28px;
+@media (min-width: 961px) {
+  .sidebar {
+    transform: none;
+    box-shadow: none;
   }
 
-  .topbar {
-    align-items: flex-start;
-    gap: 10px;
+  .backdrop,
+  .closeMenuBtn,
+  .menuBtn {
+    display: none;
+  }
+
+  .main {
+    margin-left: 260px;
+  }
+}
+
+@media (max-width: 960px) {
+  .main {
+    padding: 18px 14px 28px;
   }
 
   .pushBtn,
@@ -209,10 +245,6 @@
     max-width: 120px;
     padding: 9px 10px;
     font-size: 0.78rem;
-  }
-
-  .greeting {
-    font-size: 0.95rem;
   }
 
   .subGreeting {

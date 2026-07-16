@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { getDashboard } from '../api/admin';
 import type { DashboardStats } from '../api/admin';
 import styles from './DashboardPage.module.css';
@@ -42,29 +43,54 @@ export default function DashboardPage() {
   if (error) return <div className={styles.error}>{error}</div>;
   if (!stats) return null;
 
-  const cards = [
-    { label: 'Total users', value: stats.totalUsers },
+  const primary = [
+    { label: 'Revenue (R)', value: stats.totalRevenue.toFixed(2), to: '/rides' },
+    { label: 'Trips today / total', value: String(stats.totalRides), to: '/rides' },
+    { label: 'Approved drivers', value: String(stats.approvedDrivers ?? stats.totalDrivers), to: '/drivers' },
+    { label: 'Pending applications', value: String(stats.pendingApplications ?? 0), to: '/applications' },
+  ];
+
+  const secondary = [
     { label: 'Riders', value: stats.totalRiders },
-    { label: 'Driver profiles (all)', value: stats.totalDrivers },
-    { label: 'Approved drivers', value: stats.approvedDrivers ?? '—' },
-    { label: 'Pending driver applications', value: stats.pendingApplications ?? '—' },
-    { label: 'Total rides', value: stats.totalRides },
+    { label: 'Active rides', value: stats.pendingRides },
     { label: 'Completed rides', value: stats.completedRides },
-    { label: 'Active / in-progress rides', value: stats.pendingRides },
-    { label: 'Revenue from receipts (R)', value: stats.totalRevenue.toFixed(2) },
     { label: 'Platform 21% (R)', value: (stats.totalCommission ?? 0).toFixed(2) },
-    { label: 'Amount drivers owe from cash (R)', value: (stats.totalCommissionOwed ?? 0).toFixed(2) },
-    { label: 'Total to payout drivers (R)', value: (stats.totalToPayout ?? 0).toFixed(2) },
+    { label: 'Cash commission owed (R)', value: (stats.totalCommissionOwed ?? 0).toFixed(2) },
+    { label: 'To payout drivers (R)', value: (stats.totalToPayout ?? 0).toFixed(2) },
   ];
 
   return (
     <div>
-      <h1 className={styles.title}>Dashboard</h1>
-      <div className={styles.grid}>
-        {cards.map((c) => (
-          <div key={c.label} className={styles.card}>
+      <div className={styles.headerRow}>
+        <div>
+          <h1 className={styles.title}>Dashboard</h1>
+          <p className={styles.subtitle}>Live snapshot of Hamba Rides operations</p>
+        </div>
+        <div className={styles.quickLinks}>
+          <Link className={styles.quickLink} to="/applications">
+            Review applications
+          </Link>
+          <Link className={styles.quickLinkPrimary} to="/payouts-management">
+            Pay drivers
+          </Link>
+        </div>
+      </div>
+
+      <div className={styles.primaryGrid}>
+        {primary.map((c) => (
+          <Link key={c.label} to={c.to} className={styles.primaryCard}>
             <span className={styles.cardLabel}>{c.label}</span>
             <span className={styles.cardValue}>{c.value}</span>
+          </Link>
+        ))}
+      </div>
+
+      <h2 className={styles.sectionTitle}>More stats</h2>
+      <div className={styles.grid}>
+        {secondary.map((c) => (
+          <div key={c.label} className={styles.card}>
+            <span className={styles.cardLabel}>{c.label}</span>
+            <span className={styles.cardValueSmall}>{c.value}</span>
           </div>
         ))}
       </div>

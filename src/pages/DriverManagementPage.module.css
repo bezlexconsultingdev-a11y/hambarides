@@ -179,6 +179,184 @@
   color: #007a4d;
 }
 
+.pillRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.dangerButton,
+.dangerButtonSolid,
+.restoreButton,
+.hardDeleteLink {
+  border-radius: 10px;
+  font-weight: 700;
+  padding: 9px 12px;
+  cursor: pointer;
+}
+
+.dangerButton {
+  border: 1px solid #fecaca;
+  background: #fff;
+  color: #b91c1c;
+}
+
+.dangerButton:hover {
+  border-color: #e03c31;
+  background: #fef2f2;
+}
+
+.dangerButtonSolid {
+  border: 1px solid #e03c31;
+  background: #e03c31;
+  color: #fff;
+}
+
+.dangerButtonSolid:hover {
+  background: #c83329;
+}
+
+.restoreButton {
+  border: 1px solid #86efac;
+  background: #fff;
+  color: #166534;
+}
+
+.restoreButton:hover {
+  border-color: #007a4d;
+  color: #007a4d;
+  background: #f0fdf4;
+}
+
+.hardDeleteLink {
+  border: none;
+  background: transparent;
+  color: #b91c1c;
+  text-decoration: underline;
+  padding-left: 0;
+}
+
+.hardDeleteLink:hover {
+  color: #991b1b;
+}
+
+.dangerZone {
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.successBanner,
+.errorBanner {
+  margin-bottom: 14px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  font-weight: 600;
+}
+
+.successBanner {
+  background: #dcfce7;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+}
+
+.errorBanner {
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
+
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 1000;
+}
+
+.modal {
+  width: min(520px, 100%);
+  background: #fff;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  padding: 24px;
+  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.18);
+}
+
+.modalTitle {
+  margin: 0 0 8px;
+  font-size: 22px;
+  color: #0f172a;
+}
+
+.modalDriver {
+  margin: 0 0 12px;
+  color: #334155;
+  font-weight: 600;
+}
+
+.modalWarn {
+  margin: 0 0 16px;
+  color: #64748b;
+  line-height: 1.45;
+}
+
+.modalLabel {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.textarea {
+  width: 100%;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  padding: 12px 14px;
+  resize: vertical;
+  color: #0f172a;
+  font: inherit;
+  margin-bottom: 12px;
+  box-sizing: border-box;
+}
+
+.checkboxRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 14px;
+  color: #334155;
+  font-size: 14px;
+}
+
+.modalError {
+  margin-bottom: 12px;
+  color: #b91c1c;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.button:disabled,
+.dangerButton:disabled,
+.dangerButtonSolid:disabled,
+.restoreButton:disabled,
+.hardDeleteLink:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .detailsRow td {
   background: #f8fafc;
 }

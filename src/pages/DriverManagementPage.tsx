@@ -1,8 +1,16 @@
-import { Fragment, useEffect, useMemo, useState } from 'react';
-import { getDrivers, type DriverRow } from '../api/admin';
+import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  getDrivers,
+  hardDeleteDriver,
+  restoreDriverAccess,
+  revokeDriverAccess,
+  type DriverRow,
+} from '../api/admin';
+import DriversTabs from '../components/DriversTabs';
 import styles from './DriverManagementPage.module.css';
 
 type ExpiryState = 'expired' | 'soon' | 'valid' | 'missing';
+type ModalMode = 'revoke' | 'hardDelete' | null;
 
 const vehicleDocLabels = ['Double disc', 'Exterior photo', 'Interior photo', 'Vehicle registration / logbook'];
 
@@ -75,6 +83,41 @@ function driverNeedsAttention(driver: DriverRow) {
   return state === 'expired' || state === 'soon';
 }
 
+function verificationStatus(driver: DriverRow) {
+  return String(driver.verification_status || '').toLowerCase();
+}
+
+function isRevoked(driver: DriverRow) {
+  return verificationStatus(driver) === 'declined';
+}
+
+function isApproved(driver: DriverRow) {
+  return verificationStatus(driver) === 'approved';
+}
+
+function isPending(driver: DriverRow) {
+  const status = verificationStatus(driver);
+  return !status || status === 'pending';
+}
+
+function accessLabel(driver: DriverRow) {
+  if (isRevoked(driver)) return 'Revoked';
+  if (isApproved(driver)) return 'Approved';
+  return 'Pending';
+}
+
+function accessPillClass(driver: DriverRow) {
+  if (isRevoked(driver)) return styles.dangerPill;
+  if (isApproved(driver)) return styles.okPill;
+  return styles.warningPill;
+}
+
+function revokeReasonText(driver: DriverRow) {
+  const raw = String(driver.application?.decline_reason || '').trim();
+  if (!raw) return '';
+  return raw.replace(/^\[Admin revoke\]\s*/i, '');
+}
+
 function DocumentLink({ label, url }: { label: string; url?: string | null }) {
   if (!url) return null;
   return (
@@ -84,10 +127,23 @@ function DocumentLink({ label, url }: { label: string; url?: string | null }) {
   );
 }
 
-function DriverDetails({ driver }: { driver: DriverRow }) {
+function DriverDetails({
+  driver,
+  busy,
+  onRevoke,
+  onRestore,
+  onHardDelete,
+}: {
+  driver: DriverRow;
+  busy: boolean;
+  onRevoke: () => void;
+  onRestore: () => void;
+  onHardDelete: () => void;
+}) {
   const app = driver.application;
   const bank = driver.banking;
   const vehicleDocs = splitUrls(app?.vehicle_photos_urls);
+  const reason = revokeReasonText(driver);
 
   return (
     <div className={styles.detailsPanel}>
@@ -110,14 +166,25 @@ function DriverDetails({ driver }: { driver: DriverRow }) {
             <strong>Country of birth:</strong> {display(app?.country_of_birth)}
           </p>
           <p className={styles.field}>
-            <strong>Application status:</strong> {display(app?.status || driver.application_status)}
+            <strong>Access status:</strong> {accessLabel(driver)}
           </p>
+          {isRevoked(driver) ? (
+            <>
+              <p className={styles.field}>
+                <strong>Revoked on:</strong> {formatDate(app?.reviewed_at)}
+              </p>
+              <p className={styles.field}>
+                <strong>Reason:</strong> {display(reason, 'No reason recorded')}
+              </p>
+            </>
+          ) : null}
         </section>
 
         <section>
           <h3 className={styles.sectionTitle}>Vehicle</h3>
           <p className={styles.field}>
-            <strong>Vehicle:</strong> {display(`${driver.vehicle_year || ''} ${driver.vehicle_make || ''} ${driver.vehicle_model || ''}`.trim())}
+            <strong>Vehicle:</strong>{' '}
+            {display(`${driver.vehicle_year || ''} ${driver.vehicle_make || ''} ${driver.vehicle_model || ''}`.trim())}
           </p>
           <p className={styles.field}>
             <strong>Colour:</strong> {display(driver.vehicle_color)}
@@ -137,7 +204,7 @@ function DriverDetails({ driver }: { driver: DriverRow }) {
         </section>
 
         <section>
-          <h3 className={styles.sectionTitle}>Banking details</h3>
+          <h3 className={styles.sectionTitle}>Banking details (for payouts)</h3>
           <p className={styles.field}>
             <strong>Bank:</strong> {display(bank?.bank_name)}
           </p>
@@ -173,6 +240,28 @@ function DriverDetails({ driver }: { driver: DriverRow }) {
           </div>
         </section>
       </div>
+
+      <div className={styles.dangerZone}>
+        <h3 className={styles.sectionTitle}>Driver access</h3>
+        <p className={styles.muted}>
+          Remove access so this person cannot go online or receive rides. Trip history and payouts are kept.
+        </p>
+        <div className={styles.actions}>
+          {isApproved(driver) || isPending(driver) ? (
+            <button type="button" className={styles.dangerButton} onClick={onRevoke} disabled={busy}>
+              Remove as driver
+            </button>
+          ) : null}
+          {isRevoked(driver) ? (
+            <button type="button" className={styles.restoreButton} onClick={onRestore} disabled={busy}>
+              Restore driver access
+            </button>
+          ) : null}
+          <button type="button" className={styles.hardDeleteLink} onClick={onHardDelete} disabled={busy}>
+            Hard delete account
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
@@ -184,28 +273,35 @@ export default function DriverManagementPage() {
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState('all');
   const [expanded, setExpanded] = useState<string | number | null>(null);
+  const [modalMode, setModalMode] = useState<ModalMode>(null);
+  const [modalDriver, setModalDriver] = useState<DriverRow | null>(null);
+  const [revokeReason, setRevokeReason] = useState('');
+  const [confirmUnderstood, setConfirmUnderstood] = useState(false);
+  const [confirmEmail, setConfirmEmail] = useState('');
+  const [actionBusy, setActionBusy] = useState(false);
+  const [actionError, setActionError] = useState('');
+  const [actionSuccess, setActionSuccess] = useState('');
+
+  const loadDrivers = useCallback(async () => {
+    setLoading(true);
+    try {
+      const result = await getDrivers({ limit: 500 });
+      setDrivers(result.drivers);
+      setError('');
+    } catch (err: unknown) {
+      const message =
+        (err as { response?: { data?: { error?: string } }; message?: string })?.response?.data?.error ||
+        (err as { message?: string })?.message ||
+        'Could not load drivers';
+      setError(message);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    let mounted = true;
-    setLoading(true);
-    getDrivers({ limit: 500 })
-      .then((result) => {
-        if (!mounted) return;
-        setDrivers(result.drivers);
-        setError('');
-      })
-      .catch((err) => {
-        if (!mounted) return;
-        setError(err?.response?.data?.error || err?.message || 'Could not load drivers');
-      })
-      .finally(() => {
-        if (mounted) setLoading(false);
-      });
-
-    return () => {
-      mounted = false;
-    };
-  }, []);
+    void loadDrivers();
+  }, [loadDrivers]);
 
   const filteredDrivers = useMemo(() => {
     const term = query.trim().toLowerCase();
@@ -225,8 +321,13 @@ export default function DriverManagementPage() {
 
       if (term && !haystack.includes(term)) return false;
       if (filter === 'expiring') return driverNeedsAttention(driver);
-      if (filter === 'expired') return getExpiryState(driver.application?.license_expiry_date || driver.license_expiry_date) === 'expired';
+      if (filter === 'expired') {
+        return getExpiryState(driver.application?.license_expiry_date || driver.license_expiry_date) === 'expired';
+      }
       if (filter === 'missing-banking') return !driver.banking?.account_number;
+      if (filter === 'approved') return isApproved(driver);
+      if (filter === 'pending') return isPending(driver);
+      if (filter === 'revoked') return isRevoked(driver);
       return true;
     });
   }, [drivers, filter, query]);
@@ -234,11 +335,110 @@ export default function DriverManagementPage() {
   const expiringCount = drivers.filter(driverNeedsAttention).length;
   const missingBankingCount = drivers.filter((driver) => !driver.banking?.account_number).length;
   const onlineCount = drivers.filter((driver) => driver.is_available).length;
+  const revokedCount = drivers.filter(isRevoked).length;
 
   const buildMessage = (driver: DriverRow) =>
     encodeURIComponent(
       `Hello ${fullName(driver)}, Hamba Rides needs you to update your driver documents. Please contact support so we can keep your profile active.`
     );
+
+  const openRevokeModal = (driver: DriverRow) => {
+    setModalDriver(driver);
+    setModalMode('revoke');
+    setRevokeReason('');
+    setConfirmUnderstood(false);
+    setActionError('');
+  };
+
+  const openHardDeleteModal = (driver: DriverRow) => {
+    setModalDriver(driver);
+    setModalMode('hardDelete');
+    setConfirmEmail('');
+    setActionError('');
+  };
+
+  const closeModal = () => {
+    if (actionBusy) return;
+    setModalMode(null);
+    setModalDriver(null);
+    setRevokeReason('');
+    setConfirmUnderstood(false);
+    setConfirmEmail('');
+    setActionError('');
+  };
+
+  const submitRevoke = async () => {
+    if (!modalDriver) return;
+    const reason = revokeReason.trim();
+    if (!reason) {
+      setActionError('Enter a reason for removing driver access.');
+      return;
+    }
+    if (!confirmUnderstood) {
+      setActionError('Confirm that you understand this driver will lose access.');
+      return;
+    }
+    setActionBusy(true);
+    setActionError('');
+    try {
+      await revokeDriverAccess(modalDriver.id, reason);
+      setActionSuccess(`${fullName(modalDriver)} can no longer drive.`);
+      closeModal();
+      await loadDrivers();
+    } catch (err: unknown) {
+      const message =
+        (err as { response?: { data?: { error?: string } }; message?: string })?.response?.data?.error ||
+        (err as { message?: string })?.message ||
+        'Failed to remove driver access';
+      setActionError(message);
+    } finally {
+      setActionBusy(false);
+    }
+  };
+
+  const submitRestore = async (driver: DriverRow) => {
+    setActionBusy(true);
+    setActionError('');
+    setActionSuccess('');
+    try {
+      await restoreDriverAccess(driver.id);
+      setActionSuccess(`${fullName(driver)} can drive again.`);
+      await loadDrivers();
+    } catch (err: unknown) {
+      const message =
+        (err as { response?: { data?: { error?: string } }; message?: string })?.response?.data?.error ||
+        (err as { message?: string })?.message ||
+        'Failed to restore driver access';
+      setActionError(message);
+    } finally {
+      setActionBusy(false);
+    }
+  };
+
+  const submitHardDelete = async () => {
+    if (!modalDriver) return;
+    if (confirmEmail.trim().toLowerCase() !== String(modalDriver.email || '').trim().toLowerCase()) {
+      setActionError('Type the driver email exactly to confirm hard delete.');
+      return;
+    }
+    setActionBusy(true);
+    setActionError('');
+    try {
+      await hardDeleteDriver(modalDriver.id, confirmEmail.trim());
+      setActionSuccess(`${fullName(modalDriver)} account deleted.`);
+      setExpanded(null);
+      closeModal();
+      await loadDrivers();
+    } catch (err: unknown) {
+      const message =
+        (err as { response?: { data?: { error?: string } }; message?: string })?.response?.data?.error ||
+        (err as { message?: string })?.message ||
+        'Failed to delete driver account';
+      setActionError(message);
+    } finally {
+      setActionBusy(false);
+    }
+  };
 
   return (
     <div className={styles.page}>
@@ -246,10 +446,16 @@ export default function DriverManagementPage() {
         <div>
           <h1 className={styles.title}>Driver Management</h1>
           <p className={styles.subtitle}>
-            View each driver's contact details, vehicle file, documents and banking details in one place.
+            View each driver&apos;s file (including banking details for payouts), and remove access so they can no
+            longer drive.
           </p>
         </div>
       </header>
+
+      <DriversTabs />
+
+      {actionSuccess ? <div className={styles.successBanner}>{actionSuccess}</div> : null}
+      {actionError && !modalMode ? <div className={styles.errorBanner}>{actionError}</div> : null}
 
       <div className={styles.summaryGrid}>
         <div className={styles.summaryCard}>
@@ -263,6 +469,10 @@ export default function DriverManagementPage() {
         <div className={styles.summaryCard}>
           <p className={styles.summaryLabel}>Documents to check</p>
           <p className={styles.summaryValue}>{expiringCount}</p>
+        </div>
+        <div className={styles.summaryCard}>
+          <p className={styles.summaryLabel}>Revoked</p>
+          <p className={styles.summaryValue}>{revokedCount}</p>
         </div>
         <div className={styles.summaryCard}>
           <p className={styles.summaryLabel}>Missing banking</p>
@@ -279,6 +489,9 @@ export default function DriverManagementPage() {
         />
         <select className={styles.select} value={filter} onChange={(event) => setFilter(event.target.value)}>
           <option value="all">All drivers</option>
+          <option value="approved">Approved</option>
+          <option value="pending">Pending</option>
+          <option value="revoked">Revoked</option>
           <option value="expiring">Documents expiring soon</option>
           <option value="expired">Expired documents</option>
           <option value="missing-banking">Missing banking details</option>
@@ -321,8 +534,11 @@ export default function DriverManagementPage() {
                       <td>
                         <div className={styles.name}>{fullName(driver)}</div>
                         <div className={styles.muted}>Driver ID: {driver.id}</div>
-                        <div className={driver.is_available ? styles.okPill : styles.neutralPill}>
-                          {driver.is_available ? 'Online' : 'Offline'}
+                        <div className={styles.pillRow}>
+                          <span className={accessPillClass(driver)}>{accessLabel(driver)}</span>
+                          <span className={driver.is_available ? styles.okPill : styles.neutralPill}>
+                            {driver.is_available ? 'Online' : 'Offline'}
+                          </span>
                         </div>
                       </td>
                       <td>
@@ -330,7 +546,11 @@ export default function DriverManagementPage() {
                         <div className={styles.muted}>{display(driver.phone)}</div>
                       </td>
                       <td>
-                        <div>{display(`${driver.vehicle_year || ''} ${driver.vehicle_make || ''} ${driver.vehicle_model || ''}`.trim())}</div>
+                        <div>
+                          {display(
+                            `${driver.vehicle_year || ''} ${driver.vehicle_make || ''} ${driver.vehicle_model || ''}`.trim()
+                          )}
+                        </div>
                         <div className={styles.muted}>{display(driver.vehicle_plate_number)}</div>
                       </td>
                       <td>
@@ -351,7 +571,10 @@ export default function DriverManagementPage() {
                             {isExpanded ? 'Hide file' : 'Open file'}
                           </button>
                           {driver.email ? (
-                            <a className={styles.linkButton} href={`mailto:${driver.email}?subject=${emailSubject}&body=${emailBody}`}>
+                            <a
+                              className={styles.linkButton}
+                              href={`mailto:${driver.email}?subject=${emailSubject}&body=${emailBody}`}
+                            >
                               Email
                             </a>
                           ) : null}
@@ -365,13 +588,38 @@ export default function DriverManagementPage() {
                               WhatsApp
                             </a>
                           ) : null}
+                          {!isRevoked(driver) ? (
+                            <button
+                              type="button"
+                              className={styles.dangerButton}
+                              onClick={() => openRevokeModal(driver)}
+                              disabled={actionBusy}
+                            >
+                              Remove as driver
+                            </button>
+                          ) : (
+                            <button
+                              type="button"
+                              className={styles.restoreButton}
+                              onClick={() => void submitRestore(driver)}
+                              disabled={actionBusy}
+                            >
+                              Restore
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>
                     {isExpanded ? (
                       <tr className={styles.detailsRow}>
                         <td colSpan={6}>
-                          <DriverDetails driver={driver} />
+                          <DriverDetails
+                            driver={driver}
+                            busy={actionBusy}
+                            onRevoke={() => openRevokeModal(driver)}
+                            onRestore={() => void submitRestore(driver)}
+                            onHardDelete={() => openHardDeleteModal(driver)}
+                          />
                         </td>
                       </tr>
                     ) : null}
@@ -382,6 +630,106 @@ export default function DriverManagementPage() {
           </table>
         )}
       </div>
+
+      {modalMode && modalDriver ? (
+        <div className={styles.modalOverlay} role="presentation" onClick={closeModal}>
+          <div
+            className={styles.modal}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="driver-access-modal-title"
+            onClick={(event) => event.stopPropagation()}
+          >
+            {modalMode === 'revoke' ? (
+              <>
+                <h2 id="driver-access-modal-title" className={styles.modalTitle}>
+                  Remove as driver
+                </h2>
+                <p className={styles.modalDriver}>
+                  {fullName(modalDriver)}
+                  {modalDriver.email ? ` · ${modalDriver.email}` : ''}
+                </p>
+                <p className={styles.modalWarn}>
+                  This will revoke driving access. They cannot go online or receive rides. Trip history and payouts
+                  are kept.
+                </p>
+                <label className={styles.modalLabel} htmlFor="revoke-reason">
+                  Reason (required)
+                </label>
+                <textarea
+                  id="revoke-reason"
+                  className={styles.textarea}
+                  value={revokeReason}
+                  onChange={(event) => setRevokeReason(event.target.value)}
+                  placeholder="e.g. Failed document re-check"
+                  rows={4}
+                />
+                <label className={styles.checkboxRow}>
+                  <input
+                    type="checkbox"
+                    checked={confirmUnderstood}
+                    onChange={(event) => setConfirmUnderstood(event.target.checked)}
+                  />
+                  <span>I understand this driver will lose driver access</span>
+                </label>
+                {actionError ? <div className={styles.modalError}>{actionError}</div> : null}
+                <div className={styles.modalActions}>
+                  <button type="button" className={styles.button} onClick={closeModal} disabled={actionBusy}>
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    className={styles.dangerButtonSolid}
+                    onClick={() => void submitRevoke()}
+                    disabled={actionBusy}
+                  >
+                    {actionBusy ? 'Removing…' : 'Remove as driver'}
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <h2 id="driver-access-modal-title" className={styles.modalTitle}>
+                  Hard delete account
+                </h2>
+                <p className={styles.modalDriver}>
+                  {fullName(modalDriver)}
+                  {modalDriver.email ? ` · ${modalDriver.email}` : ''}
+                </p>
+                <p className={styles.modalWarn}>
+                  This permanently deletes the driver profile and login. Prefer <strong>Remove as driver</strong> for
+                  day-to-day cases.
+                </p>
+                <label className={styles.modalLabel} htmlFor="confirm-email">
+                  Type the driver email to confirm
+                </label>
+                <input
+                  id="confirm-email"
+                  className={styles.input}
+                  value={confirmEmail}
+                  onChange={(event) => setConfirmEmail(event.target.value)}
+                  placeholder={modalDriver.email || 'driver@email.com'}
+                  autoComplete="off"
+                />
+                {actionError ? <div className={styles.modalError}>{actionError}</div> : null}
+                <div className={styles.modalActions}>
+                  <button type="button" className={styles.button} onClick={closeModal} disabled={actionBusy}>
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    className={styles.dangerButtonSolid}
+                    onClick={() => void submitHardDelete()}
+                    disabled={actionBusy}
+                  >
+                    {actionBusy ? 'Deleting…' : 'Delete account'}
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

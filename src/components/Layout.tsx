@@ -4,6 +4,49 @@ import { useAuth } from '../context/AuthContext';
 import { enableAdminWebPush, getAdminWebPushStatus } from '../api/adminPush';
 import styles from './Layout.module.css';
 
+type NavItem = { to: string; label: string; match?: (path: string) => boolean };
+type NavGroup = { label: string; items: NavItem[] };
+
+const NAV_GROUPS: NavGroup[] = [
+  {
+    label: 'Overview',
+    items: [{ to: '/', label: 'Dashboard', match: (p) => p === '/' }],
+  },
+  {
+    label: 'People',
+    items: [
+      { to: '/users', label: 'Users' },
+      { to: '/drivers', label: 'Drivers', match: (p) => p === '/drivers' || p.startsWith('/applications') || p === '/driver-management' },
+      { to: '/driver-management', label: 'Driver files' },
+      { to: '/applications', label: 'Applications' },
+    ],
+  },
+  {
+    label: 'Operations',
+    items: [
+      { to: '/rides', label: 'Rides' },
+      { to: '/sos', label: 'SOS' },
+      { to: '/support', label: 'Support' },
+    ],
+  },
+  {
+    label: 'Finance',
+    items: [
+      { to: '/payouts-management', label: 'Payouts', match: (p) => p.startsWith('/payouts') },
+      { to: '/performance', label: 'Performance' },
+    ],
+  },
+  {
+    label: 'System',
+    items: [{ to: '/notifications', label: 'Notifications' }],
+  },
+];
+
+function isActive(path: string, item: NavItem) {
+  if (item.match) return item.match(path);
+  return path === item.to;
+}
+
 export default function Layout() {
   const { user, logout } = useAuth();
   const location = useLocation();
@@ -20,7 +63,7 @@ export default function Layout() {
       month: 'long',
       year: 'numeric',
     }).format(now);
-    return `Good ${part} admin, ${date}`;
+    return `Good ${part}, ${date}`;
   }, []);
 
   useEffect(() => {
@@ -49,21 +92,6 @@ export default function Layout() {
     }
   };
 
-  const navItems = [
-    { to: '/', label: 'Dashboard' },
-    { to: '/users', label: 'Users' },
-    { to: '/drivers', label: 'Drivers' },
-    { to: '/driver-management', label: 'Driver Management' },
-    { to: '/applications', label: 'Applications' },
-    { to: '/payouts', label: 'Payouts' },
-    { to: '/payouts-management', label: 'Payout Management' },
-    { to: '/performance', label: 'Driver Performance' },
-    { to: '/rides', label: 'Rides' },
-    { to: '/support', label: 'Support Tickets' },
-    { to: '/sos', label: 'SOS events' },
-    { to: '/notifications', label: 'Notifications' },
-  ];
-
   return (
     <div className={styles.layout}>
       <div
@@ -72,21 +100,28 @@ export default function Layout() {
       />
       <aside className={`${styles.sidebar} ${menuOpen ? styles.sidebarOpen : ''}`}>
         <div className={styles.sidebarHeader}>
-          <img src="/logo.png" alt="Hamba Rides" className={styles.logoImage} />
-          <h1 className={styles.logo}>Admin</h1>
-          <button type="button" className={styles.closeMenuBtn} onClick={() => setMenuOpen(false)}>
-            X
+          <div className={styles.brandBlock}>
+            <p className={styles.brandName}>Hamba Rides</p>
+            <p className={styles.brandSub}>Admin</p>
+          </div>
+          <button type="button" className={styles.closeMenuBtn} onClick={() => setMenuOpen(false)} aria-label="Close menu">
+            ×
           </button>
         </div>
         <nav className={styles.nav}>
-          {navItems.map((item) => (
-            <Link
-              key={item.to}
-              to={item.to}
-              className={location.pathname === item.to ? styles.navLinkActive : styles.navLink}
-            >
-              {item.label}
-            </Link>
+          {NAV_GROUPS.map((group) => (
+            <div key={group.label} className={styles.navGroup}>
+              <p className={styles.navGroupLabel}>{group.label}</p>
+              {group.items.map((item) => (
+                <Link
+                  key={item.to}
+                  to={item.to}
+                  className={isActive(location.pathname, item) ? styles.navLinkActive : styles.navLink}
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </div>
           ))}
         </nav>
         <div className={styles.sidebarFooter}>
@@ -98,12 +133,12 @@ export default function Layout() {
       </aside>
       <main className={styles.main}>
         <header className={styles.topbar}>
-          <button type="button" className={styles.menuBtn} onClick={() => setMenuOpen(true)}>
+          <button type="button" className={styles.menuBtn} onClick={() => setMenuOpen(true)} aria-label="Open menu">
             ☰
           </button>
           <div>
             <p className={styles.greeting}>{greeting}</p>
-            <p className={styles.subGreeting}>Private Hamba Rides admin dashboard</p>
+            <p className={styles.subGreeting}>Hamba Rides admin dashboard</p>
           </div>
           <button
             type="button"
@@ -118,7 +153,7 @@ export default function Layout() {
                   : 'Enable admin notifications'
             }
           >
-            {pushStatus === 'enabled' ? 'Notifications on' : pushBusy ? 'Enabling...' : 'Enable alerts'}
+            {pushStatus === 'enabled' ? 'Alerts on' : pushBusy ? 'Enabling...' : 'Enable alerts'}
           </button>
         </header>
         <Outlet />
