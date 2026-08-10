@@ -2,22 +2,29 @@ import { useState, useEffect, useMemo } from 'react';
 import { getRides } from '../api/admin';
 import type { RideRow } from '../api/admin';
 import styles from './TablePage.module.css';
+import {
+  formatHambaCategoryLabel,
+  HAMBA_CATEGORY_FILTER_OPTIONS,
+  rideTypeMatchesFilter,
+} from '../utils/hambaCategories';
 
 const PLATFORM_SHARE = 0.21;
 
 function exportRidesCsv(rides: RideRow[]) {
-  const headers = ['ID', 'Type', 'Rider ID', 'Driver ID', 'Pickup', 'Dropoff', 'Status', 'Fare (R)', 'Platform 21% (R)', 'Requested'];
+  const headers = ['ID', 'Type', 'Rider ID', 'Driver ID', 'Pickup', 'Dropoff', 'Status', 'Payment', 'Payment status', 'Fare (R)', 'Platform 21% (R)', 'Requested'];
   const rows = rides.map((r) => {
     const fare = r.fare_amount != null ? Number(r.fare_amount) : 0;
     const platform = fare * PLATFORM_SHARE;
     return [
       r.id,
-      r.ride_type ?? 'standard',
+      formatHambaCategoryLabel(r.ride_type),
       r.rider_id,
       r.driver_id ?? '',
       `"${(r.pickup_address || '').replace(/"/g, '""')}"`,
       `"${(r.dropoff_address || '').replace(/"/g, '""')}"`,
       r.status,
+      r.payment_method ?? '',
+      r.payment_status ?? '',
       fare.toFixed(2),
       platform.toFixed(2),
       new Date(r.requested_at).toISOString(),
@@ -50,7 +57,7 @@ export default function RidesPage() {
   const filteredRides = useMemo(() => {
     let list = rides;
     if (rideTypeFilter) {
-      list = list.filter((r) => r.ride_type === rideTypeFilter);
+      list = list.filter((r) => rideTypeMatchesFilter(r.ride_type, rideTypeFilter));
     }
     if (dateFrom) {
       const from = new Date(dateFrom);
@@ -96,10 +103,11 @@ export default function RidesPage() {
           className={styles.select}
         >
           <option value="">All ride types</option>
-          <option value="economy">Economy</option>
-          <option value="economy_women">Economy Women</option>
-          <option value="standard">Standard</option>
-          <option value="standard_women">Standard Women</option>
+          {HAMBA_CATEGORY_FILTER_OPTIONS.map((opt) => (
+            <option key={opt.value} value={opt.value}>
+              {opt.label}
+            </option>
+          ))}
         </select>
         <label className={styles.dateLabel}>
           From
@@ -137,6 +145,8 @@ export default function RidesPage() {
               <th>Pickup</th>
               <th>Dropoff</th>
               <th>Status</th>
+              <th>Payment</th>
+              <th>Pay status</th>
               <th>Fare (R)</th>
               <th>Platform 21% (R)</th>
               <th>Requested</th>
@@ -149,12 +159,14 @@ export default function RidesPage() {
               return (
                 <tr key={r.id}>
                   <td>{r.id}</td>
-                  <td>{r.ride_type ?? 'standard'}</td>
+                  <td>{formatHambaCategoryLabel(r.ride_type)}</td>
                   <td>{r.rider_id}</td>
                   <td>{r.driver_id ?? '–'}</td>
                   <td className={styles.cellClip}>{r.pickup_address}</td>
                   <td className={styles.cellClip}>{r.dropoff_address}</td>
                   <td>{r.status}</td>
+                  <td>{r.payment_method ?? '–'}</td>
+                  <td>{r.payment_status ?? '–'}</td>
                   <td>{fare > 0 ? fare.toFixed(2) : '–'}</td>
                   <td>{fare > 0 ? platform.toFixed(2) : '–'}</td>
                   <td>{new Date(r.requested_at).toLocaleString()}</td>

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import './DriverApplicationsEnhancedPage.css';
+import { formatHambaCategoryLabel, normalizeHambaCategory } from '../utils/hambaCategories';
 
 interface DriverApplication {
   id: number;
@@ -14,7 +15,7 @@ interface DriverApplication {
   vehicle_year: number;
   vehicle_color: string;
   vehicle_plate_number: string;
-  vehicle_type: 'economy' | 'standard';
+  vehicle_type: string;
   vehicle_photos: string[];
   profile_photo_url?: string;
   verification_status: 'pending' | 'approved' | 'declined';
@@ -202,8 +203,8 @@ export default function DriverApplicationsEnhancedPage() {
                     <p className="phone">{app.phone}</p>
                   </div>
                 </div>
-                <span className={`badge badge-${app.vehicle_type}`}>
-                  {app.vehicle_type.toUpperCase()}
+                <span className={`badge badge-${normalizeHambaCategory(app.vehicle_type)}`}>
+                  {formatHambaCategoryLabel(app.vehicle_type)}
                 </span>
               </div>
 
@@ -290,8 +291,8 @@ export default function DriverApplicationsEnhancedPage() {
                   </div>
                   <div className="detail-row">
                     <strong>Classification:</strong>
-                    <span className={`badge badge-${selectedApp.vehicle_type}`}>
-                      {selectedApp.vehicle_type.toUpperCase()}
+                    <span className={`badge badge-${normalizeHambaCategory(selectedApp.vehicle_type)}`}>
+                      {formatHambaCategoryLabel(selectedApp.vehicle_type)}
                     </span>
                   </div>
                   <div className="detail-row">

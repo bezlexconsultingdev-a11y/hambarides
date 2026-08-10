@@ -10,6 +10,8 @@ interface Driver {
   last_name: string;
   email: string;
   total_earned: number;
+  gross_fares?: number;
+  driver_take_home?: number;
   total_paid_out: number;
   available_balance: number;
   amount_owed_from_cash_rides: number;
@@ -33,6 +35,8 @@ interface PayoutDetails {
     last_name: string;
     email: string;
     total_earned: number;
+    gross_fares?: number;
+    driver_take_home?: number;
     total_paid_out: number;
     available_balance: number;
     total_rides_completed: number;
@@ -165,8 +169,9 @@ export default function PayoutsManagementPage() {
       <div className={styles.header}>
         <h1>Driver Payouts</h1>
         <p className={styles.subtitle}>
-          Full banking details are shown so you can send EFTs. Card and EFT balances automatically recover the 21%
-          platform amount owed from cash rides.
+          <strong>Take-home</strong> is what the driver keeps (~79% of fares). For cash rides they already have that
+          money, so <strong>bank payout owed</strong> is R0. <strong>Cash commission</strong> is the 21% they still owe
+          the platform.
         </p>
       </div>
 
@@ -195,8 +200,8 @@ export default function PayoutsManagementPage() {
           <thead>
             <tr>
               <th>Driver</th>
-              <th>Balance</th>
-              <th>Cash commission</th>
+              <th>Bank payout owed</th>
+              <th>Cash commission owed</th>
               <th>Bank</th>
               <th>Account holder</th>
               <th>Account number</th>
@@ -221,14 +226,17 @@ export default function PayoutsManagementPage() {
                       {driver.first_name} {driver.last_name}
                     </div>
                     <div className={styles.driverEmail}>{driver.email}</div>
-                    <div className={styles.miniNote}>{driver.total_rides} rides · earned {formatCurrency(driver.total_earned)}</div>
+                    <div className={styles.miniNote}>
+                      {driver.total_rides} rides · take-home {formatCurrency(driver.driver_take_home ?? 0)}
+                      {driver.gross_fares ? ` · fares ${formatCurrency(driver.gross_fares)}` : ''}
+                    </div>
                   </td>
                   <td className={styles.balanceCell}>{formatCurrency(driver.available_balance)}</td>
                   <td>
                     {formatCurrency(driver.amount_owed_from_cash_rides || 0)}
                     {driver.cash_commission_remaining_from_cash_rides ? (
                       <div className={styles.miniNote}>
-                        Remaining: {formatCurrency(driver.cash_commission_remaining_from_cash_rides)}
+                        Still owed to platform: {formatCurrency(driver.cash_commission_remaining_from_cash_rides)}
                       </div>
                     ) : null}
                   </td>
@@ -281,7 +289,15 @@ export default function PayoutsManagementPage() {
                     <span>{selectedDriver.driver.total_rides_completed}</span>
                   </div>
                   <div className={styles.breakdownRow}>
-                    <span>Total Earned:</span>
+                    <span>Gross fares (riders paid):</span>
+                    <span>{formatCurrency(selectedDriver.driver.gross_fares || 0)}</span>
+                  </div>
+                  <div className={styles.breakdownRow}>
+                    <span>Driver take-home (~79%):</span>
+                    <span>{formatCurrency(selectedDriver.driver.driver_take_home || 0)}</span>
+                  </div>
+                  <div className={styles.breakdownRow}>
+                    <span>Bank payout owed (card/EFT net):</span>
                     <span>{formatCurrency(selectedDriver.driver.total_earned)}</span>
                   </div>
                   <div className={styles.breakdownRow}>
@@ -289,15 +305,15 @@ export default function PayoutsManagementPage() {
                     <span>-{formatCurrency(selectedDriver.driver.total_paid_out)}</span>
                   </div>
                   <div className={styles.breakdownRow}>
-                    <span>Cash commission created:</span>
+                    <span>Cash commission (21% driver owes you):</span>
                     <span>{formatCurrency(selectedDriver.driver.amount_owed_from_cash_rides || 0)}</span>
                   </div>
                   <div className={styles.breakdownRow}>
-                    <span>Remaining after deductions:</span>
+                    <span>Cash commission still outstanding:</span>
                     <span>{formatCurrency(selectedDriver.driver.cash_commission_remaining_from_cash_rides || 0)}</span>
                   </div>
                   <div className={styles.breakdownRow + ' ' + styles.total}>
-                    <span>Available Balance:</span>
+                    <span>Available for EFT:</span>
                     <span>{formatCurrency(selectedDriver.driver.available_balance)}</span>
                   </div>
                 </div>

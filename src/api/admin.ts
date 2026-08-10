@@ -233,6 +233,46 @@ export async function declineApplication(id: number, reason?: string): Promise<{
   };
 }
 
+export interface CategoryUpgradeRequest {
+  driver_id: number | string;
+  user_id: number | string;
+  email: string;
+  phone: string;
+  first_name: string;
+  last_name: string;
+  full_name: string;
+  vehicle_make?: string;
+  vehicle_model?: string;
+  vehicle_year?: number;
+  vehicle_color?: string;
+  vehicle_plate_number?: string;
+  current_vehicle_type: string;
+  current_label: string;
+  requested_vehicle_type: string;
+  requested_label: string;
+  requested_at?: string | null;
+  verification_status?: string | null;
+}
+
+export async function getPendingCategoryUpgrades(params?: {
+  limit?: number;
+}): Promise<{ requests: CategoryUpgradeRequest[]; migrationRequired?: boolean }> {
+  const { data } = await api.get('/admin/drivers/category-upgrades/pending', {
+    params: { limit: params?.limit ?? 100 },
+  });
+  return data as { requests: CategoryUpgradeRequest[]; migrationRequired?: boolean };
+}
+
+export async function approveCategoryUpgrade(driverId: number | string): Promise<void> {
+  await api.post(`/admin/drivers/${encodeURIComponent(String(driverId))}/category-upgrade/approve`);
+}
+
+export async function rejectCategoryUpgrade(driverId: number | string, reason?: string): Promise<void> {
+  await api.post(`/admin/drivers/${encodeURIComponent(String(driverId))}/category-upgrade/reject`, {
+    reason,
+  });
+}
+
 export interface RideRow {
   id: number | string;
   rider_id: number | string;

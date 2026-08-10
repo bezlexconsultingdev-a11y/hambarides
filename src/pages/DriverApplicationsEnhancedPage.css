@@ -153,6 +153,26 @@
   color: #FF9500;
 }
 
+.badge-lite {
+  background: #E8F4FF;
+  color: #007AFF;
+}
+
+.badge-comfort {
+  background: #ECFDF5;
+  color: #047857;
+}
+
+.badge-plus {
+  background: #FFF4E6;
+  color: #FF9500;
+}
+
+.badge-max {
+  background: #EEF2FF;
+  color: #4338CA;
+}
+
 .card-body {
   padding: 20px;
 }

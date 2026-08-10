@@ -7,7 +7,7 @@ import UsersPage from './pages/UsersPage';
 import DriversPage from './pages/DriversPage';
 import DriverManagementPage from './pages/DriverManagementPage';
 import RidesPage from './pages/RidesPage';
-import ApplicationsPage from './pages/ApplicationsPage';
+import CategoryUpgradesPage from './pages/CategoryUpgradesPage';
 import PayoutsManagementPage from './pages/PayoutsManagementPage';
 import SupportTicketsPage from './pages/SupportTicketsPage';
 import SystemConfigPage from './pages/SystemConfigPage';
@@ -46,6 +46,7 @@ function AppRoutes() {
         <Route path="driver-management" element={<DriverManagementPage />} />
         <Route path="applications" element={<ApplicationsPage />} />
         <Route path="applications-enhanced" element={<ApplicationsPage />} />
+        <Route path="category-upgrades" element={<CategoryUpgradesPage />} />
         <Route path="sos-alerts" element={<SOSAlertsPage />} />
         <Route path="trip-sharing" element={<TripSharingAnalyticsPage />} />
         <Route path="payouts" element={<Navigate to="/payouts-management" replace />} />
