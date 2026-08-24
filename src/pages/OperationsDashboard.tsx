@@ -88,22 +88,39 @@ export default function OperationsDashboard() {
     }, 10000); // Refresh every 10 seconds
 
     const apiBase = (import.meta.env.VITE_API_BASE || 'http://localhost:5000/api').replace(/\/api$/, '');
-    const token = localStorage.getItem('admin_token') || 'admin';
-    const socket: Socket = ioClient(apiBase, {
-      transports: ['websocket'],
-    });
-    socket.on('connect', () => {
-      socket.emit('identify', { type: 'admin', userId: token });
-    });
-    socket.on('admin_ops_event', (event: OpsEvent) => {
-      setOpsEvents((prev) => [event, ...prev].slice(0, 30));
-      void fetchOpsSummary();
-    });
+    let cancelled = false;
+    let socket: Socket | null = null;
+
+    const setupSocket = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      const accessToken = session?.access_token;
+      const adminUserId = session?.user?.id;
+      if (cancelled || !accessToken || !adminUserId) return;
+
+      socket = ioClient(apiBase, {
+        auth: { token: accessToken },
+        transports: ['websocket'],
+      });
+      if (cancelled) {
+        socket.disconnect();
+        return;
+      }
+      socket.on('connect', () => {
+        socket?.emit('identify', { type: 'admin', userId: adminUserId });
+      });
+      socket.on('admin_ops_event', (event: OpsEvent) => {
+        setOpsEvents((prev) => [event, ...prev].slice(0, 30));
+        void fetchOpsSummary();
+      });
+    };
+
+    void setupSocket();
 
     return () => {
+      cancelled = true;
       ridesChannel.unsubscribe();
       clearInterval(interval);
-      socket.disconnect();
+      socket?.disconnect();
     };
   }, []);
 
