@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
+import { api } from '../api/client';
 import styles from './PricingPage.module.css';
 
 interface PricingRow {
@@ -13,15 +14,86 @@ interface PricingRow {
   max_surge_multiplier: number;
 }
 
+interface DisplayDiscountSettings {
+  enabled: boolean;
+  discount_pct: number;
+  banner_text: string;
+  badge_text: string;
+  breakdown_label: string;
+  footer_caption: string;
+  starts_at: string | null;
+  ends_at: string | null;
+}
+
+const DISPLAY_DEFAULTS: DisplayDiscountSettings = {
+  enabled: false,
+  discount_pct: 21,
+  banner_text: '21% off · Launch special',
+  badge_text: '21% OFF',
+  breakdown_label: 'Launch discount (21%)',
+  footer_caption: 'You pay the normal fare. 21% off vs list price.',
+  starts_at: null,
+  ends_at: null,
+};
+
 export default function PricingPage() {
   const [rows, setRows] = useState<PricingRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
+  const [displaySettings, setDisplaySettings] = useState<DisplayDiscountSettings>(DISPLAY_DEFAULTS);
+  const [savingDisplay, setSavingDisplay] = useState(false);
 
   useEffect(() => {
     loadPricing();
+    loadDisplayDiscount();
   }, []);
+
+  async function loadDisplayDiscount() {
+    try {
+      const res = await api.get('/admin/promotions/display-discount');
+      const s = res.data?.settings || {};
+      setDisplaySettings({
+        enabled: Boolean(s.enabled),
+        discount_pct: Number(s.discount_pct) || 21,
+        banner_text: s.banner_text || DISPLAY_DEFAULTS.banner_text,
+        badge_text: s.badge_text || DISPLAY_DEFAULTS.badge_text,
+        breakdown_label: s.breakdown_label || DISPLAY_DEFAULTS.breakdown_label,
+        footer_caption: s.footer_caption || DISPLAY_DEFAULTS.footer_caption,
+        starts_at: s.starts_at || null,
+        ends_at: s.ends_at || null,
+      });
+    } catch (err) {
+      console.warn('display discount load failed', err);
+    }
+  }
+
+  async function saveDisplayDiscount() {
+    setSavingDisplay(true);
+    setMessage('');
+    try {
+      const res = await api.put('/admin/promotions/display-discount', displaySettings);
+      const s = res.data?.settings || displaySettings;
+      setDisplaySettings({
+        enabled: Boolean(s.enabled),
+        discount_pct: Number(s.discount_pct) || 21,
+        banner_text: s.banner_text || DISPLAY_DEFAULTS.banner_text,
+        badge_text: s.badge_text || DISPLAY_DEFAULTS.badge_text,
+        breakdown_label: s.breakdown_label || DISPLAY_DEFAULTS.breakdown_label,
+        footer_caption: s.footer_caption || DISPLAY_DEFAULTS.footer_caption,
+        starts_at: s.starts_at || null,
+        ends_at: s.ends_at || null,
+      });
+      setMessage('Display discount settings saved.');
+    } catch (err: any) {
+      setMessage(
+        err?.response?.data?.error ||
+          'Failed to save display discount. Run the Supabase migration first.'
+      );
+    } finally {
+      setSavingDisplay(false);
+    }
+  }
 
   async function loadPricing() {
     setLoading(true);
@@ -93,6 +165,82 @@ export default function PricingPage() {
       </div>
 
       {message && <div className={styles.message}>{message}</div>}
+
+      <div className={styles.card} style={{ marginBottom: 24 }}>
+        <h2 className={styles.cardTitle}>Display discount (marketing only)</h2>
+        <p className={styles.subtitle} style={{ marginBottom: 16 }}>
+          Inflates the shown list price by {displaySettings.discount_pct}%, then shows that amount as a
+          discount. Rider still pays the normal fare. Driver/platform split unchanged.
+        </p>
+        <label style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+          <input
+            type="checkbox"
+            checked={displaySettings.enabled}
+            onChange={(e) =>
+              setDisplaySettings((prev) => ({ ...prev, enabled: e.target.checked }))
+            }
+          />
+          Enable display discount in rider app
+        </label>
+        <div className={styles.fields}>
+          <label>
+            Banner text
+            <input
+              type="text"
+              maxLength={60}
+              value={displaySettings.banner_text}
+              onChange={(e) =>
+                setDisplaySettings((prev) => ({ ...prev, banner_text: e.target.value }))
+              }
+            />
+          </label>
+          <label>
+            Badge text
+            <input
+              type="text"
+              maxLength={16}
+              value={displaySettings.badge_text}
+              onChange={(e) =>
+                setDisplaySettings((prev) => ({ ...prev, badge_text: e.target.value }))
+              }
+            />
+          </label>
+          <label>
+            Breakdown label
+            <input
+              type="text"
+              maxLength={40}
+              value={displaySettings.breakdown_label}
+              onChange={(e) =>
+                setDisplaySettings((prev) => ({ ...prev, breakdown_label: e.target.value }))
+              }
+            />
+          </label>
+          <label>
+            Footer caption
+            <input
+              type="text"
+              maxLength={100}
+              value={displaySettings.footer_caption}
+              onChange={(e) =>
+                setDisplaySettings((prev) => ({ ...prev, footer_caption: e.target.value }))
+              }
+            />
+          </label>
+        </div>
+        <div className={styles.message} style={{ background: '#f3f4f6', color: '#374151' }}>
+          Preview: Normal R100 → show <s>R121</s> <strong>R100</strong> ({displaySettings.badge_text}).
+          Banner: “{displaySettings.banner_text}”
+        </div>
+        <button
+          className={styles.saveBtn}
+          onClick={saveDisplayDiscount}
+          disabled={savingDisplay}
+          style={{ marginTop: 12 }}
+        >
+          {savingDisplay ? 'Saving...' : 'Save display discount'}
+        </button>
+      </div>
 
       <div className={styles.grid}>
         {rows.map((row) => (
