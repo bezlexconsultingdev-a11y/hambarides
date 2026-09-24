@@ -9,6 +9,11 @@ const TABS = [
     label: 'Category upgrades',
     match: (path: string) => path.startsWith('/category-upgrades'),
   },
+  {
+    to: '/vehicle-approvals',
+    label: 'Vehicle approvals',
+    match: (path: string) => path.startsWith('/vehicle-approvals'),
+  },
   { to: '/driver-management', label: 'Driver files', match: (path: string) => path === '/driver-management' },
 ];
 

@@ -16,10 +16,11 @@ const NAV_GROUPS: NavGroup[] = [
     label: 'People',
     items: [
       { to: '/users', label: 'Users' },
-      { to: '/drivers', label: 'Drivers', match: (p) => p === '/drivers' || p.startsWith('/applications') || p === '/driver-management' || p.startsWith('/category-upgrades') },
+      { to: '/drivers', label: 'Drivers', match: (p) => p === '/drivers' || p.startsWith('/applications') || p === '/driver-management' || p.startsWith('/category-upgrades') || p.startsWith('/vehicle-approvals') },
       { to: '/driver-management', label: 'Driver files' },
       { to: '/applications', label: 'Applications' },
       { to: '/category-upgrades', label: 'Category upgrades' },
+      { to: '/vehicle-approvals', label: 'Vehicle approvals' },
     ],
   },
   {

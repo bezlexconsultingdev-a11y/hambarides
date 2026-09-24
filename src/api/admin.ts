@@ -273,6 +273,53 @@ export async function rejectCategoryUpgrade(driverId: number | string, reason?: 
   });
 }
 
+export interface PendingVehicleApproval {
+  id: number | string;
+  driver_id: number | string;
+  user_id?: number | string;
+  email?: string;
+  phone?: string;
+  first_name?: string;
+  last_name?: string;
+  full_name?: string;
+  make: string;
+  model: string;
+  year: number;
+  color: string;
+  plate_number: string;
+  vehicle_type: string;
+  door_count?: number | null;
+  passenger_seats?: number | null;
+  body_type?: string | null;
+  photos?: string[] | Record<string, string> | null;
+  submitted_at?: string | null;
+  current_active_vehicle?: string;
+  current_vehicle_type?: string;
+  requested_label?: string;
+  verification_status?: string | null;
+}
+
+export async function getPendingVehicleApprovals(params?: {
+  limit?: number;
+}): Promise<{ vehicles: PendingVehicleApproval[]; migrationRequired?: boolean }> {
+  const { data } = await api.get('/admin/drivers/vehicles/pending', {
+    params: { limit: params?.limit ?? 100 },
+  });
+  return data as { vehicles: PendingVehicleApproval[]; migrationRequired?: boolean };
+}
+
+export async function approveVehicle(vehicleId: number | string, activate = true): Promise<void> {
+  await api.post(`/admin/drivers/vehicles/${encodeURIComponent(String(vehicleId))}/approve`, {
+    activate,
+  });
+}
+
+export async function rejectVehicle(vehicleId: number | string, reason?: string): Promise<void> {
+  await api.post(`/admin/drivers/vehicles/${encodeURIComponent(String(vehicleId))}/reject`, {
+    reason,
+  });
+}
+
 export interface RideRow {
   id: number | string;
   rider_id: number | string;

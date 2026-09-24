@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { api } from '../api/client';
 import styles from './SystemConfigPage.module.css';
 
@@ -10,10 +10,19 @@ interface ConfigItem {
   updated_at: string;
 }
 
+interface RegionPreset {
+  id: string;
+  name: string;
+  kind: string;
+  description?: string;
+  radius_km?: number;
+  enabled?: boolean;
+}
+
 export default function SystemConfigPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  
+
   // Pricing configuration
   const [baseFare, setBaseFare] = useState('15.00');
   const [perKmRate, setPerKmRate] = useState('8.50');
@@ -22,27 +31,36 @@ export default function SystemConfigPage() {
   const [commissionRate, setCommissionRate] = useState('20');
   const [surgePricingEnabled, setSurgePricingEnabled] = useState(false);
   const [surgeMultiplier, setSurgeMultiplier] = useState('1.5');
-  
-  // Service areas
-  const [serviceAreas, setServiceAreas] = useState('Johannesburg, Pretoria, Cape Town, Durban');
-  
+
+  // Operating regions
+  const [regionCatalog, setRegionCatalog] = useState<RegionPreset[]>([]);
+  const [enabledRegionIds, setEnabledRegionIds] = useState<string[]>(['gqeberha']);
+  const [regionMessage, setRegionMessage] = useState('');
+
   // Business settings
   const [maxRideDistance, setMaxRideDistance] = useState('100');
   const [driverRadius, setDriverRadius] = useState('10');
   const [rideTimeout, setRideTimeout] = useState('300');
   const [cancellationFee, setCancellationFee] = useState('15.00');
 
-  useEffect(() => {
-    loadConfigs();
-  }, []);
-
-  const loadConfigs = async () => {
+  const loadConfigs = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await api.get('/admin/config');
-      const configData = response.data.configs || [];
-      
-      // Parse and set values
+      const [configRes, catalogRes] = await Promise.all([
+        api.get('/admin/config').catch(() => ({ data: { configs: [] } })),
+        api.get('/admin/operating-regions/catalog').catch(() => ({ data: null })),
+      ]);
+
+      const catalog = (catalogRes.data?.catalog || []) as RegionPreset[];
+      setRegionCatalog(catalog);
+      if (Array.isArray(catalogRes.data?.enabled_region_ids)) {
+        setEnabledRegionIds(catalogRes.data.enabled_region_ids.map(String));
+      }
+      if (catalogRes.data?.message) {
+        setRegionMessage(String(catalogRes.data.message));
+      }
+
+      const configData = configRes.data.configs || [];
       configData.forEach((config: ConfigItem) => {
         const value = config.config_value;
         switch (config.config_key) {
@@ -57,8 +75,11 @@ export default function SystemConfigPage() {
           case 'commission':
             if (value.rate) setCommissionRate(value.rate.toString());
             break;
-          case 'service_areas':
-            if (value.areas) setServiceAreas(value.areas.join(', '));
+          case 'operating_regions':
+            if (Array.isArray(value?.enabled_region_ids)) {
+              setEnabledRegionIds(value.enabled_region_ids.map(String));
+            }
+            if (value?.message) setRegionMessage(String(value.message));
             break;
           case 'business_rules':
             if (value.max_ride_distance) setMaxRideDistance(value.max_ride_distance.toString());
@@ -68,17 +89,52 @@ export default function SystemConfigPage() {
             break;
         }
       });
+
+      if (!catalog.length) {
+        // Fallback presets if backend not deployed yet
+        setRegionCatalog([
+          { id: 'za-all', name: 'All South Africa', kind: 'bbox', description: 'Nationwide' },
+          {
+            id: 'gqeberha',
+            name: 'Port Elizabeth (Gqeberha)',
+            kind: 'circle',
+            description: 'Nelson Mandela Bay (~45 km)',
+          },
+          { id: 'johannesburg', name: 'Johannesburg', kind: 'circle', description: '~50 km' },
+          { id: 'pretoria', name: 'Pretoria (Tshwane)', kind: 'circle', description: '~40 km' },
+          { id: 'cape-town', name: 'Cape Town', kind: 'circle', description: '~50 km' },
+          { id: 'durban', name: 'Durban', kind: 'circle', description: '~40 km' },
+        ]);
+      }
     } catch (error) {
       console.error('Failed to load configs:', error);
     } finally {
       setLoading(false);
     }
+  }, []);
+
+  useEffect(() => {
+    void loadConfigs();
+  }, [loadConfigs]);
+
+  const toggleRegion = (id: string) => {
+    setEnabledRegionIds((prev) => {
+      if (id === 'za-all') {
+        // Selecting nationwide clears city-only selections for clarity
+        return prev.includes('za-all') ? [] : ['za-all'];
+      }
+      const withoutNation = prev.filter((x) => x !== 'za-all');
+      if (withoutNation.includes(id)) {
+        return withoutNation.filter((x) => x !== id);
+      }
+      return [...withoutNation, id];
+    });
   };
 
   const handleSave = async () => {
     try {
       setSaving(true);
-      
+
       const configUpdates = [
         {
           config_key: 'pricing',
@@ -90,7 +146,7 @@ export default function SystemConfigPage() {
             surge_pricing_enabled: surgePricingEnabled,
             surge_multiplier: parseFloat(surgeMultiplier),
           },
-          description: 'Ride pricing configuration'
+          description: 'Ride pricing configuration',
         },
         {
           config_key: 'commission',
@@ -98,25 +154,26 @@ export default function SystemConfigPage() {
             rate: parseFloat(commissionRate),
             driver_share: 100 - parseFloat(commissionRate),
           },
-          description: 'Platform commission rate'
+          description: 'Platform commission rate',
         },
         {
-          config_key: 'service_areas',
+          config_key: 'operating_regions',
           config_value: {
-            areas: serviceAreas.split(',').map(a => a.trim()).filter(a => a),
+            enabled_region_ids: enabledRegionIds,
+            message: regionMessage.trim() || undefined,
           },
-          description: 'Active service areas'
+          description: 'Where rider booking and driver go-online are allowed',
         },
         {
           config_key: 'business_rules',
           config_value: {
             max_ride_distance: parseFloat(maxRideDistance),
             driver_search_radius: parseFloat(driverRadius),
-            ride_timeout_seconds: parseInt(rideTimeout),
+            ride_timeout_seconds: parseInt(rideTimeout, 10),
             cancellation_fee: parseFloat(cancellationFee),
           },
-          description: 'Business rules and limits'
-        }
+          description: 'Business rules and limits',
+        },
       ];
 
       await api.post('/admin/config/bulk-update', { configs: configUpdates });
@@ -134,17 +191,76 @@ export default function SystemConfigPage() {
     return <div className={styles.loading}>Loading configuration...</div>;
   }
 
+  const nationWide = enabledRegionIds.includes('za-all');
+
   return (
     <div className={styles.container}>
       <div className={styles.header}>
         <h1>System Configuration</h1>
-        <p className={styles.subtitle}>Manage pricing, service areas, and business rules</p>
+        <p className={styles.subtitle}>Manage pricing, operating regions, and business rules</p>
       </div>
 
       <div className={styles.sections}>
-        {/* Pricing Configuration */}
         <div className={styles.section}>
-          <h2>💰 Pricing Configuration</h2>
+          <h2>Operating regions</h2>
+          <p className={styles.hint} style={{ marginBottom: 12 }}>
+            Choose where the rider and driver apps may operate. Select <strong>All South Africa</strong> for
+            nationwide, or one or more cities (e.g. Port Elizabeth only).
+          </p>
+          <div className={styles.regionGrid}>
+            {regionCatalog.map((region) => {
+              const checked = enabledRegionIds.includes(region.id);
+              const disabledByNation = nationWide && region.id !== 'za-all';
+              return (
+                <label
+                  key={region.id}
+                  className={`${styles.regionCard} ${checked ? styles.regionCardOn : ''} ${
+                    disabledByNation ? styles.regionCardDisabled : ''
+                  }`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={checked}
+                    disabled={disabledByNation}
+                    onChange={() => toggleRegion(region.id)}
+                  />
+                  <span>
+                    <strong>{region.name}</strong>
+                    <br />
+                    <span className={styles.hint}>{region.description || region.kind}</span>
+                  </span>
+                </label>
+              );
+            })}
+          </div>
+          <div className={styles.field} style={{ marginTop: 16 }}>
+            <label>Rider / driver message (optional)</label>
+            <input
+              type="text"
+              value={regionMessage}
+              onChange={(e) => setRegionMessage(e.target.value)}
+              className={styles.input}
+              placeholder="Leave blank to auto-generate from selected regions"
+            />
+            <span className={styles.hint}>
+              Shown when someone tries to book or go online outside the selected area.
+            </span>
+          </div>
+          <p className={styles.hint}>
+            Currently active:{' '}
+            <strong>
+              {enabledRegionIds.length
+                ? regionCatalog
+                    .filter((r) => enabledRegionIds.includes(r.id))
+                    .map((r) => r.name)
+                    .join(', ')
+                : 'None (apps will block all trips)'}
+            </strong>
+          </p>
+        </div>
+
+        <div className={styles.section}>
+          <h2>Pricing Configuration</h2>
           <div className={styles.grid}>
             <div className={styles.field}>
               <label>Base Fare (R)</label>
@@ -155,7 +271,6 @@ export default function SystemConfigPage() {
                 onChange={(e) => setBaseFare(e.target.value)}
                 className={styles.input}
               />
-              <span className={styles.hint}>Initial charge when ride starts</span>
             </div>
             <div className={styles.field}>
               <label>Per Kilometer Rate (R)</label>
@@ -166,7 +281,6 @@ export default function SystemConfigPage() {
                 onChange={(e) => setPerKmRate(e.target.value)}
                 className={styles.input}
               />
-              <span className={styles.hint}>Charge per kilometer traveled</span>
             </div>
             <div className={styles.field}>
               <label>Per Minute Rate (R)</label>
@@ -177,7 +291,6 @@ export default function SystemConfigPage() {
                 onChange={(e) => setPerMinuteRate(e.target.value)}
                 className={styles.input}
               />
-              <span className={styles.hint}>Charge per minute of ride time</span>
             </div>
             <div className={styles.field}>
               <label>Minimum Fare (R)</label>
@@ -188,7 +301,6 @@ export default function SystemConfigPage() {
                 onChange={(e) => setMinimumFare(e.target.value)}
                 className={styles.input}
               />
-              <span className={styles.hint}>Minimum charge for any ride</span>
             </div>
           </div>
 
@@ -212,15 +324,13 @@ export default function SystemConfigPage() {
                   onChange={(e) => setSurgeMultiplier(e.target.value)}
                   className={styles.input}
                 />
-                <span className={styles.hint}>Multiply base rates during high demand</span>
               </div>
             )}
           </div>
         </div>
 
-        {/* Commission Configuration */}
         <div className={styles.section}>
-          <h2>📊 Commission Configuration</h2>
+          <h2>Commission Configuration</h2>
           <div className={styles.field}>
             <label>Platform Commission Rate (%)</label>
             <input
@@ -233,30 +343,13 @@ export default function SystemConfigPage() {
               className={styles.input}
             />
             <span className={styles.hint}>
-              Platform takes {commissionRate}%, Driver receives {100 - parseFloat(commissionRate)}%
+              Platform takes {commissionRate}%, Driver receives {100 - parseFloat(commissionRate || '0')}%
             </span>
           </div>
         </div>
 
-        {/* Service Areas */}
         <div className={styles.section}>
-          <h2>📍 Service Areas</h2>
-          <div className={styles.field}>
-            <label>Active Service Areas</label>
-            <textarea
-              value={serviceAreas}
-              onChange={(e) => setServiceAreas(e.target.value)}
-              className={styles.textarea}
-              rows={3}
-              placeholder="Enter cities separated by commas"
-            />
-            <span className={styles.hint}>Comma-separated list of cities where service is available</span>
-          </div>
-        </div>
-
-        {/* Business Rules */}
-        <div className={styles.section}>
-          <h2>⚙️ Business Rules</h2>
+          <h2>Business Rules</h2>
           <div className={styles.grid}>
             <div className={styles.field}>
               <label>Max Ride Distance (km)</label>
@@ -267,7 +360,6 @@ export default function SystemConfigPage() {
                 onChange={(e) => setMaxRideDistance(e.target.value)}
                 className={styles.input}
               />
-              <span className={styles.hint}>Maximum allowed ride distance</span>
             </div>
             <div className={styles.field}>
               <label>Driver Search Radius (km)</label>
@@ -278,7 +370,6 @@ export default function SystemConfigPage() {
                 onChange={(e) => setDriverRadius(e.target.value)}
                 className={styles.input}
               />
-              <span className={styles.hint}>Radius to search for available drivers</span>
             </div>
             <div className={styles.field}>
               <label>Ride Request Timeout (seconds)</label>
@@ -289,7 +380,6 @@ export default function SystemConfigPage() {
                 onChange={(e) => setRideTimeout(e.target.value)}
                 className={styles.input}
               />
-              <span className={styles.hint}>Time before ride request expires</span>
             </div>
             <div className={styles.field}>
               <label>Cancellation Fee (R)</label>
@@ -300,18 +390,13 @@ export default function SystemConfigPage() {
                 onChange={(e) => setCancellationFee(e.target.value)}
                 className={styles.input}
               />
-              <span className={styles.hint}>Fee charged for late cancellations</span>
             </div>
           </div>
         </div>
       </div>
 
       <div className={styles.footer}>
-        <button
-          className={styles.saveButton}
-          onClick={handleSave}
-          disabled={saving}
-        >
+        <button className={styles.saveButton} onClick={handleSave} disabled={saving}>
           {saving ? 'Saving...' : 'Save All Configuration'}
         </button>
       </div>

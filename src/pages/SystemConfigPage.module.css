@@ -153,3 +153,37 @@
   font-size: 1.125rem;
   color: #666;
 }
+
+.regionGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 0.75rem;
+}
+
+.regionCard {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  padding: 0.9rem 1rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  background: #fff;
+  cursor: pointer;
+}
+
+.regionCard input {
+  margin-top: 0.2rem;
+  width: 18px;
+  height: 18px;
+}
+
+.regionCardOn {
+  border-color: #007749;
+  background: #e8f5e9;
+}
+
+.regionCardDisabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
