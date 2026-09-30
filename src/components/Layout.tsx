@@ -16,6 +16,7 @@ const NAV_GROUPS: NavGroup[] = [
     label: 'People',
     items: [
       { to: '/users', label: 'Users' },
+      { to: '/rider-verifications', label: 'Rider verifications' },
       { to: '/drivers', label: 'Drivers', match: (p) => p === '/drivers' || p.startsWith('/applications') || p === '/driver-management' || p.startsWith('/category-upgrades') || p.startsWith('/vehicle-approvals') },
       { to: '/driver-management', label: 'Driver files' },
       { to: '/applications', label: 'Applications' },

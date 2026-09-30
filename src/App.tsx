@@ -7,6 +7,7 @@ import UsersPage from './pages/UsersPage';
 import DriversPage from './pages/DriversPage';
 import DriverManagementPage from './pages/DriverManagementPage';
 import ApplicationsPage from './pages/ApplicationsPage';
+import RiderVerificationsPage from './pages/RiderVerificationsPage';
 import RidesPage from './pages/RidesPage';
 import CategoryUpgradesPage from './pages/CategoryUpgradesPage';
 import VehicleApprovalsPage from './pages/VehicleApprovalsPage';
@@ -44,6 +45,7 @@ function AppRoutes() {
       >
         <Route index element={<DashboardPage />} />
         <Route path="users" element={<UsersPage />} />
+        <Route path="rider-verifications" element={<RiderVerificationsPage />} />
         <Route path="drivers" element={<DriversPage />} />
         <Route path="driver-management" element={<DriverManagementPage />} />
         <Route path="applications" element={<ApplicationsPage />} />

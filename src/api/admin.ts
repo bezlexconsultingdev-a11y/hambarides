@@ -449,3 +449,47 @@ export async function getTripLogs(params?: { limit?: number }): Promise<{ trip_l
   const rows = (data?.trip_logs ?? []) as TripLogRow[];
   return { trip_logs: rows };
 }
+
+export interface RiderVerificationRow {
+  id: string;
+  user_id: string;
+  document_type: string;
+  document_url?: string | null;
+  front_image_url?: string | null;
+  back_image_url?: string | null;
+  selfie_url?: string | null;
+  status: string;
+  created_at: string;
+  email?: string | null;
+  phone?: string | null;
+  first_name?: string | null;
+  last_name?: string | null;
+  full_name: string;
+  gender?: string | null;
+  gender_verified?: boolean;
+  verification_status?: string | null;
+}
+
+export async function getPendingRiderVerifications(params?: {
+  limit?: number;
+}): Promise<{ verifications: RiderVerificationRow[] }> {
+  const { data } = await api.get('/admin/verifications/pending', {
+    params: { limit: params?.limit ?? 100 },
+  });
+  return data as { verifications: RiderVerificationRow[] };
+}
+
+export async function approveRiderVerification(id: string): Promise<{ verification: RiderVerificationRow }> {
+  const { data } = await api.post(`/admin/verifications/${encodeURIComponent(id)}/approve`);
+  return data as { verification: RiderVerificationRow };
+}
+
+export async function rejectRiderVerification(
+  id: string,
+  reason?: string
+): Promise<{ verification: RiderVerificationRow }> {
+  const { data } = await api.post(`/admin/verifications/${encodeURIComponent(id)}/reject`, {
+    reason,
+  });
+  return data as { verification: RiderVerificationRow };
+}
